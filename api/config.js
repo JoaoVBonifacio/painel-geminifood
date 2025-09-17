@@ -11,6 +11,17 @@ export default function handler(request, response) {
     appId: process.env.VITE_FIREBASE_APP_ID,
   };
 
-  // Enviamos o objeto como resposta em formato JSON
+  // Verificamos se todas as chaves foram carregadas
+  for (const key in firebaseConfig) {
+    if (!firebaseConfig[key]) {
+      // Se uma chave estiver em falta, envia uma mensagem de erro clara
+      return response.status(500).json({ 
+        error: "Erro de configuração no servidor.",
+        message: `A variável de ambiente ${key.replace(/([A-Z])/g, '_$1').toUpperCase()} não está definida na Vercel.`
+      });
+    }
+  }
+
+  // Se tudo estiver correto, enviamos o objeto como resposta em formato JSON
   response.status(200).json(firebaseConfig);
 }
