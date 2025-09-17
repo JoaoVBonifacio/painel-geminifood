@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+// A importação do Storage foi REMOVIDA intencionalmente
 
 // Esta função vai buscar as chaves secretas ao nosso "cofre" na Vercel
 async function getFirebaseConfig() {
@@ -27,7 +27,6 @@ async function initialize() {
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
         
         const settingsRef = doc(db, "settings", "main");
         const productsRef = collection(db, "products");
@@ -35,8 +34,7 @@ async function initialize() {
 
         let allCategories = [];
         let allProducts = [];
-        let currentFile = null;
-
+        
         // --- LÓGICA DE AUTENTICAÇÃO ---
         onAuthStateChanged(auth, user => {
             const loginScreen = document.getElementById('login-screen');
@@ -201,14 +199,18 @@ async function initialize() {
             document.getElementById('product-desc').value = product?.description || '';
             document.getElementById('product-price').value = product?.price || '';
             document.getElementById('product-category').value = product?.categoryId || '';
+            document.getElementById('product-image-url').value = product?.imageUrl || ''; // Campo de URL
             document.getElementById('modal-title').textContent = id ? 'Editar Produto' : 'Adicionar Novo Produto';
             const preview = document.getElementById('image-preview');
+
             if (product?.imageUrl) {
                 preview.src = product.imageUrl;
                 preview.classList.remove('hidden');
-            } else { preview.src = ''; preview.classList.add('hidden'); }
-            document.getElementById('product-image').value = '';
-            currentFile = null;
+            } else { 
+                preview.src = '';
+                preview.classList.add('hidden');
+            }
+            
             document.getElementById('product-modal').classList.remove('hidden');
             document.getElementById('product-modal').classList.add('flex');
         };
@@ -220,12 +222,15 @@ async function initialize() {
 
         document.getElementById('add-product-btn').addEventListener('click', () => openModal());
         document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
-        document.getElementById('product-image').addEventListener('change', e => {
-            currentFile = e.target.files[0];
-            if(currentFile) {
-                const preview = document.getElementById('image-preview');
-                preview.src = URL.createObjectURL(currentFile);
+        
+        document.getElementById('product-image-url').addEventListener('input', e => {
+            const preview = document.getElementById('image-preview');
+            const url = e.target.value;
+            if (url) {
+                preview.src = url;
                 preview.classList.remove('hidden');
+            } else {
+                preview.classList.add('hidden');
             }
         });
         
@@ -235,36 +240,32 @@ async function initialize() {
                 name: document.getElementById('product-name').value,
                 description: document.getElementById('product-desc').value,
                 price: parseFloat(document.getElementById('product-price').value),
-                categoryId: document.getElementById('product-category').value
+                categoryId: document.getElementById('product-category').value,
+                imageUrl: document.getElementById('product-image-url').value.trim()
             };
 
             if (!data.name || isNaN(data.price) || !data.categoryId) return alert("Nome, preço e categoria são obrigatórios.");
+
+            if (!data.imageUrl) {
+                data.imageUrl = 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
+            }
 
             const button = document.getElementById('save-product-btn');
             button.disabled = true; button.textContent = "A guardar...";
 
             try {
-                if (currentFile) {
-                    const storagePath = `products/${Date.now()}_${currentFile.name}`;
-                    const imageRef = ref(storage, storagePath);
-                    await uploadBytes(imageRef, currentFile);
-                    data.imageUrl = await getDownloadURL(imageRef);
-                }
-
                 if (id) {
                     const productRef = doc(db, "products", id);
-                    if(!data.imageUrl) {
-                        const existingDoc = await getDoc(productRef);
-                        data.imageUrl = existingDoc.data().imageUrl;
-                    }
                     await updateDoc(productRef, data);
                 } else {
-                     if(!data.imageUrl) data.imageUrl = 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
                     await addDoc(productsRef, data);
                 }
                 closeModal();
-            } catch (error) { alert("Erro ao guardar: " + error.message);
-            } finally { button.disabled = false; button.textContent = "Guardar"; }
+            } catch (error) { 
+                alert("Erro ao guardar: " + error.message);
+            } finally { 
+                button.disabled = false; button.textContent = "Guardar"; 
+            }
         });
 
         document.getElementById('product-list').addEventListener('click', async (e) => {
