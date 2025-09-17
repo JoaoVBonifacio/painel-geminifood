@@ -1,8 +1,5 @@
 {
-    "rewrites": [
-    { 
-        "source": "/api/:path*", 
-        "destination": "/api/:path*" 
-    }
-    ]
+  "name": "geminifood-admin-panel",
+  "version": "1.0.0",
+  "type": "module"
 }
