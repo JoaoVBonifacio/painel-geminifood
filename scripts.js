@@ -29,11 +29,259 @@ async function initialize() {
         const db = getFirestore(app);
         const storage = getStorage(app);
         
-        // --- TODO o resto do seu código JavaScript do painel vai aqui ---
-        // (Copie da versão anterior, começando pelas referências)
         const settingsRef = doc(db, "settings", "main");
         const productsRef = collection(db, "products");
-        // ...etc...
+        const categoriesRef = collection(db, "categories");
+
+        let allCategories = [];
+        let allProducts = [];
+        let currentFile = null;
+
+        // --- LÓGICA DE AUTENTICAÇÃO ---
+        onAuthStateChanged(auth, user => {
+            const loginScreen = document.getElementById('login-screen');
+            const mainPanel = document.getElementById('main-panel');
+            if (user) {
+                loginScreen.classList.add('hidden');
+                mainPanel.classList.remove('hidden');
+                loadSettings();
+                listenToCategories();
+                listenToProducts();
+            } else {
+                loginScreen.classList.remove('hidden');
+                mainPanel.classList.add('hidden');
+            }
+        });
+        
+        document.getElementById('login-btn').addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const authError = document.getElementById('auth-error');
+            authError.classList.add('hidden');
+
+            signInWithEmailAndPassword(auth, email, password)
+                .catch(error => {
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                        createUserWithEmailAndPassword(auth, email, password)
+                           .catch(err => { authError.textContent = "Erro ao criar conta: " + err.message; authError.classList.remove('hidden'); });
+                    } else { authError.textContent = error.message; authError.classList.remove('hidden'); }
+                });
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+        
+        // --- LÓGICA DE CONFIGURAÇÕES ---
+        async function loadSettings() {
+            const docSnap = await getDoc(settingsRef);
+            if(docSnap.exists()) {
+                const settings = docSnap.data();
+                document.getElementById('whatsapp-number').value = settings.whatsappNumber || '';
+                document.getElementById('whatsapp-message').value = settings.whatsappMessage || '*Novo Pedido* 🍔\n\n*Cliente:* {cliente}\n*Itens:*\n{itens}\n\n*Morada:*\n{morada}\n*Pagamento:* {pagamento}\n*Total: {total}*';
+                document.getElementById('minimum-order').value = settings.minimumOrder || 5.00;
+            }
+        }
+
+        document.getElementById('save-settings-btn').addEventListener('click', () => {
+            const data = {
+                whatsappNumber: document.getElementById('whatsapp-number').value,
+                whatsappMessage: document.getElementById('whatsapp-message').value,
+                minimumOrder: parseFloat(document.getElementById('minimum-order').value) || 0
+            };
+            setDoc(settingsRef, data, { merge: true })
+                .then(() => alert("Configurações guardadas!"))
+                .catch(err => alert("Erro: " + err.message));
+        });
+
+        // --- LÓGICA DE CATEGORIAS ---
+        function listenToCategories() {
+            const q = query(categoriesRef, orderBy("name"));
+            onSnapshot(q, snapshot => {
+                const categoryList = document.getElementById('category-list');
+                const categorySelect = document.getElementById('product-category');
+                categoryList.innerHTML = '';
+                categorySelect.innerHTML = '<option value="">-- Selecione uma categoria --</option>';
+                allCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                allCategories.forEach(cat => {
+                    const item = document.createElement('div');
+                    item.className = "flex justify-between items-center p-2 bg-gray-50 rounded-md";
+                    item.innerHTML = `
+                        <span class="text-gray-700">${cat.name}</span>
+                        <div class="space-x-2">
+                           <button class="edit-cat-btn text-sm text-blue-500" data-id="${cat.id}" data-name="${cat.name}">Editar</button>
+                           <button class="delete-cat-btn text-sm text-red-500" data-id="${cat.id}">X</button>
+                        </div>
+                    `;
+                    categoryList.appendChild(item);
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    categorySelect.appendChild(option);
+                });
+                renderProductList();
+            });
+        }
+
+        document.getElementById('add-category-btn').addEventListener('click', async () => {
+            const input = document.getElementById('new-category-name');
+            const name = input.value.trim();
+            if(name) {
+                await addDoc(categoriesRef, { name });
+                input.value = '';
+            }
+        });
+
+        document.getElementById('category-list').addEventListener('click', async (e) => {
+            const id = e.target.dataset.id;
+            if(!id) return;
+            const categoryDocRef = doc(db, 'categories', id);
+
+            if(e.target.classList.contains('edit-cat-btn')) {
+                const newName = prompt("Novo nome para a categoria:", e.target.dataset.name);
+                if(newName && newName.trim()) {
+                    await updateDoc(categoryDocRef, { name: newName.trim() });
+                }
+            }
+
+            if(e.target.classList.contains('delete-cat-btn')) {
+                const q = query(productsRef, where("categoryId", "==", id));
+                const productsInCategory = await getDocs(q);
+                if (!productsInCategory.empty) {
+                    alert("Não pode remover esta categoria pois existem produtos associados a ela.");
+                    return;
+                }
+                if(confirm("Tem a certeza que quer remover esta categoria?")) {
+                    await deleteDoc(categoryDocRef);
+                }
+            }
+        });
+
+        // --- LÓGICA DE PRODUTOS ---
+        function listenToProducts() {
+            onSnapshot(productsRef, snapshot => {
+                allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderProductList();
+            });
+        }
+
+        function renderProductList() {
+            const productListContainer = document.getElementById('product-list');
+            productListContainer.innerHTML = '';
+
+            allCategories.forEach(cat => {
+                const productsInCategory = allProducts.filter(p => p.categoryId === cat.id);
+                if (productsInCategory.length > 0) {
+                    let categorySection = `<div class="mb-6"><h3 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">${cat.name}</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+                    productsInCategory.forEach(product => {
+                        categorySection += `
+                            <div class="bg-white p-4 rounded-lg shadow-sm flex">
+                                <img src="${product.imageUrl || 'https://placehold.co/100x100'}" class="w-20 h-20 rounded-md object-cover mr-4">
+                                <div class="flex-grow">
+                                    <h4 class="font-semibold">${product.name}</h4>
+                                    <p class="text-sm text-gray-500">${(product.price || 0).toFixed(2)} €</p>
+                                </div>
+                                <div class="flex flex-col items-end justify-between">
+                                    <div class="space-x-2">
+                                        <button class="edit-btn text-sm text-blue-500" data-id="${product.id}">Editar</button>
+                                        <button class="delete-btn text-sm text-red-500" data-id="${product.id}">Remover</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    categorySection += `</div></div>`;
+                    productListContainer.innerHTML += categorySection;
+                }
+            });
+        }
+        
+        const openModal = (product = null, id = null) => {
+            document.getElementById('product-id').value = id || '';
+            document.getElementById('product-name').value = product?.name || '';
+            document.getElementById('product-desc').value = product?.description || '';
+            document.getElementById('product-price').value = product?.price || '';
+            document.getElementById('product-category').value = product?.categoryId || '';
+            document.getElementById('modal-title').textContent = id ? 'Editar Produto' : 'Adicionar Novo Produto';
+            const preview = document.getElementById('image-preview');
+            if (product?.imageUrl) {
+                preview.src = product.imageUrl;
+                preview.classList.remove('hidden');
+            } else { preview.src = ''; preview.classList.add('hidden'); }
+            document.getElementById('product-image').value = '';
+            currentFile = null;
+            document.getElementById('product-modal').classList.remove('hidden');
+            document.getElementById('product-modal').classList.add('flex');
+        };
+
+        const closeModal = () => {
+            document.getElementById('product-modal').classList.add('hidden');
+            document.getElementById('product-modal').classList.remove('flex');
+        };
+
+        document.getElementById('add-product-btn').addEventListener('click', () => openModal());
+        document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
+        document.getElementById('product-image').addEventListener('change', e => {
+            currentFile = e.target.files[0];
+            if(currentFile) {
+                const preview = document.getElementById('image-preview');
+                preview.src = URL.createObjectURL(currentFile);
+                preview.classList.remove('hidden');
+            }
+        });
+        
+        document.getElementById('save-product-btn').addEventListener('click', async () => {
+            const id = document.getElementById('product-id').value;
+            const data = {
+                name: document.getElementById('product-name').value,
+                description: document.getElementById('product-desc').value,
+                price: parseFloat(document.getElementById('product-price').value),
+                categoryId: document.getElementById('product-category').value
+            };
+
+            if (!data.name || isNaN(data.price) || !data.categoryId) return alert("Nome, preço e categoria são obrigatórios.");
+
+            const button = document.getElementById('save-product-btn');
+            button.disabled = true; button.textContent = "A guardar...";
+
+            try {
+                if (currentFile) {
+                    const storagePath = `products/${Date.now()}_${currentFile.name}`;
+                    const imageRef = ref(storage, storagePath);
+                    await uploadBytes(imageRef, currentFile);
+                    data.imageUrl = await getDownloadURL(imageRef);
+                }
+
+                if (id) {
+                    const productRef = doc(db, "products", id);
+                    if(!data.imageUrl) {
+                        const existingDoc = await getDoc(productRef);
+                        data.imageUrl = existingDoc.data().imageUrl;
+                    }
+                    await updateDoc(productRef, data);
+                } else {
+                     if(!data.imageUrl) data.imageUrl = 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
+                    await addDoc(productsRef, data);
+                }
+                closeModal();
+            } catch (error) { alert("Erro ao guardar: " + error.message);
+            } finally { button.disabled = false; button.textContent = "Guardar"; }
+        });
+
+        document.getElementById('product-list').addEventListener('click', async (e) => {
+            const id = e.target.dataset.id;
+            if (!id) return;
+            const productRef = doc(db, "products", id);
+
+            if (e.target.classList.contains('edit-btn')) {
+                const docSnap = await getDoc(productRef);
+                openModal(docSnap.data(), id);
+            }
+            if (e.target.classList.contains('delete-btn')) {
+                if (confirm("Tem a certeza que quer remover este produto?")) {
+                    await deleteDoc(productRef);
+                }
+            }
+        });
 
     } catch (error) {
         console.error("Erro Crítico na Inicialização:", error);
@@ -42,3 +290,4 @@ async function initialize() {
 }
 
 initialize();
+

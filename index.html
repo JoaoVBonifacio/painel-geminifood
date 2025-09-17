@@ -14,7 +14,6 @@
 <body class="bg-gray-100">
 
     <div id="app">
-        <!-- O HTML completo do painel de controlo vai aqui -->
         <!-- Ecrã de Login -->
         <div id="login-screen" class="min-h-screen flex items-center justify-center">
             <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
@@ -26,10 +25,88 @@
                 <p class="text-xs text-center text-gray-500 mt-4">Primeiro acesso? A conta será criada automaticamente.</p>
             </div>
         </div>
-        <!-- ... resto do HTML do painel ... -->
+
+        <!-- Painel Principal (escondido por defeito) -->
+        <div id="main-panel" class="hidden">
+            <header class="bg-white shadow-md">
+                <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-orange-500">GeminiFood Admin</h1>
+                    <button id="logout-btn" class="text-sm text-gray-600 hover:text-orange-500">Sair</button>
+                </div>
+            </header>
+
+            <main class="container mx-auto px-6 py-8">
+                <!-- Secção de Configurações -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Configurações Gerais</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="whatsapp-number" class="block text-sm font-medium text-gray-600 mb-1">Número de WhatsApp</label>
+                            <input type="text" id="whatsapp-number" placeholder="351912345678" class="w-full p-2 border rounded-md">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="whatsapp-message" class="block text-sm font-medium text-gray-600 mb-1">Modelo da Mensagem</label>
+                            <textarea id="whatsapp-message" rows="3" class="w-full p-2 border rounded-md"></textarea>
+                        </div>
+                        <div>
+                            <label for="minimum-order" class="block text-sm font-medium text-gray-600 mb-1">Pedido Mínimo (€)</label>
+                            <input type="number" id="minimum-order" placeholder="5.00" class="w-full p-2 border rounded-md">
+                        </div>
+                    </div>
+                    <button id="save-settings-btn" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Guardar Configurações</button>
+                </div>
+                
+                <!-- Secção de Gestão de Categorias e Cardápio -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Coluna de Categorias -->
+                    <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-md self-start">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700">Categorias</h3>
+                        <div id="category-list" class="space-y-2 mb-4"></div>
+                        <div class="flex space-x-2">
+                            <input type="text" id="new-category-name" placeholder="Nova categoria" class="w-full p-2 border rounded-md">
+                            <button id="add-category-btn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">+</button>
+                        </div>
+                    </div>
+                    <!-- Coluna do Cardápio -->
+                    <div class="lg:col-span-2">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold text-gray-800">Cardápio</h2>
+                            <button id="add-product-btn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Adicionar Produto</button>
+                        </div>
+                        <div id="product-list" class="space-y-6"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
 
-    <!-- O caminho relativo ainda funciona porque o index.html e o script.js estão na mesma pasta 'public' -->
+    <!-- Modal para Adicionar/Editar Produto -->
+    <div id="product-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg m-4">
+            <h2 id="modal-title" class="text-2xl font-bold mb-6">Adicionar Novo Produto</h2>
+            <input type="hidden" id="product-id">
+            <div class="space-y-4">
+                <input type="text" id="product-name" placeholder="Nome do Produto" class="w-full p-3 border rounded-md">
+                <textarea id="product-desc" placeholder="Descrição" class="w-full p-3 border rounded-md"></textarea>
+                <input type="number" id="product-price" placeholder="Preço (€)" step="0.01" class="w-full p-3 border rounded-md">
+                <div>
+                     <label for="product-category" class="block text-sm font-medium text-gray-600 mb-1">Categoria</label>
+                     <select id="product-category" class="w-full p-3 border rounded-md bg-white"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Fotografia do Produto</label>
+                    <input type="file" id="product-image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
+                    <img id="image-preview" src="" class="mt-2 h-32 rounded-md hidden"/>
+                </div>
+            </div>
+            <div class="flex justify-end mt-6 space-x-4">
+                <button id="cancel-modal-btn" class="text-gray-600 px-4 py-2 rounded-md">Cancelar</button>
+                <button id="save-product-btn" class="bg-orange-500 text-white px-4 py-2 rounded-md">Guardar</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="script.js"></script>
 </body>
 </html>
+
