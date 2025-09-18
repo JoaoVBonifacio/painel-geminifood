@@ -5,69 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Controlo - GeminiFood</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class', // Habilita o modo escuro baseado na classe 'dark' no HTML
+        theme: {
+          extend: {
+            // Você pode adicionar extensões de tema aqui se precisar
+          }
+        }
+      }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .modal-bg { background-color: rgba(0,0,0,0.5); }
+        /* Transição suave de cores para uma melhor experiência */
+        body, input, textarea, select, button, div {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 dark:bg-gray-900">
 
     <div id="app">
-        <!-- Ecrã de Login -->
         <div id="login-screen" class="min-h-screen flex items-center justify-center">
-            <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-                <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Acesso Admin</h2>
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
+                <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-6">Acesso Admin</h2>
                 <div id="auth-error" class="text-red-500 text-sm mb-4 hidden"></div>
-                <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-orange-400">
-                <input type="password" id="password" placeholder="Palavra-passe" class="w-full p-3 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded-md mb-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                <input type="password" id="password" placeholder="Palavra-passe" class="w-full p-3 border rounded-md mb-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400">
                 <button id="login-btn" class="w-full bg-orange-500 text-white p-3 rounded-md hover:bg-orange-600 transition-colors">Entrar</button>
-                <p class="text-xs text-center text-gray-500 mt-4">Primeiro acesso? A conta será criada automaticamente.</p>
+                <p class="text-xs text-center text-gray-500 dark:text-gray-400 mt-4">Primeiro acesso? A conta será criada automaticamente.</p>
             </div>
         </div>
 
-        <!-- Painel Principal (escondido por defeito) -->
         <div id="main-panel" class="hidden">
-            <header class="bg-white shadow-md">
+            <header class="bg-white dark:bg-gray-800 shadow-md">
                 <div class="container mx-auto px-6 py-4 flex justify-between items-center">
                     <h1 class="text-2xl font-bold text-orange-500">GeminiFood Admin</h1>
-                    <button id="logout-btn" class="text-sm text-gray-600 hover:text-orange-500">Sair</button>
+                    <button id="logout-btn" class="text-sm text-gray-600 dark:text-gray-300 hover:text-orange-500">Sair</button>
                 </div>
             </header>
             <main class="container mx-auto px-6 py-8">
-                <!-- Secção de Configurações -->
-                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Configurações Gerais</h3>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Configurações Gerais</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label for="whatsapp-number" class="block text-sm font-medium text-gray-600 mb-1">Número de WhatsApp</label>
-                            <input type="text" id="whatsapp-number" placeholder="351912345678" class="w-full p-2 border rounded-md">
+                            <label for="whatsapp-number" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Número de WhatsApp</label>
+                            <input type="text" id="whatsapp-number" placeholder="351912345678" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                         </div>
                         <div class="md:col-span-2">
-                            <label for="whatsapp-message" class="block text-sm font-medium text-gray-600 mb-1">Modelo da Mensagem</label>
-                            <textarea id="whatsapp-message" rows="3" class="w-full p-2 border rounded-md"></textarea>
+                            <label for="whatsapp-message" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Modelo da Mensagem</label>
+                            <textarea id="whatsapp-message" rows="3" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"></textarea>
                         </div>
                         <div>
-                            <label for="minimum-order" class="block text-sm font-medium text-gray-600 mb-1">Pedido Mínimo (€)</label>
-                            <input type="number" id="minimum-order" placeholder="5.00" class="w-full p-2 border rounded-md">
+                            <label for="minimum-order" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Pedido Mínimo (€)</label>
+                            <input type="number" id="minimum-order" placeholder="5.00" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                         </div>
                     </div>
                     <button id="save-settings-btn" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Guardar Configurações</button>
                 </div>
                 
-                <!-- Secção de Gestão de Categorias e Cardápio -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-md self-start">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-700">Categorias</h3>
+                    <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md self-start">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Categorias</h3>
                         <div id="category-list" class="space-y-2 mb-4"></div>
                         <div class="flex space-x-2">
-                            <input type="text" id="new-category-name" placeholder="Nova categoria" class="w-full p-2 border rounded-md">
+                            <input type="text" id="new-category-name" placeholder="Nova categoria" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                             <button id="add-category-btn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">+</button>
                         </div>
                     </div>
                     <div class="lg:col-span-2">
                         <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-semibold text-gray-800">Cardápio</h2>
+                            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">Cardápio</h2>
                             <button id="add-product-btn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Adicionar Produto</button>
                         </div>
                         <div id="product-list" class="space-y-6"></div>
@@ -77,28 +87,26 @@
         </div>
     </div>
 
-    <!-- Modal para Adicionar/Editar Produto -->
     <div id="product-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg m-4 max-h-[90vh] overflow-y-auto">
-            <h2 id="modal-title" class="text-2xl font-bold mb-6">Adicionar Novo Produto</h2>
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-lg m-4 max-h-[90vh] overflow-y-auto">
+            <h2 id="modal-title" class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Adicionar Novo Produto</h2>
             <input type="hidden" id="product-id">
             <div class="space-y-4">
-                <input type="text" id="product-name" placeholder="Nome do Produto" class="w-full p-3 border rounded-md">
-                <textarea id="product-desc" placeholder="Descrição" class="w-full p-3 border rounded-md"></textarea>
-                <input type="number" id="product-price" placeholder="Preço (€)" step="0.01" class="w-full p-3 border rounded-md">
+                <input type="text" id="product-name" placeholder="Nome do Produto" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                <textarea id="product-desc" placeholder="Descrição" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"></textarea>
+                <input type="number" id="product-price" placeholder="Preço (€)" step="0.01" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                 <div>
-                     <label for="product-category" class="block text-sm font-medium text-gray-600 mb-1">Categoria</label>
-                     <select id="product-category" class="w-full p-3 border rounded-md bg-white"></select>
+                     <label for="product-category" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Categoria</label>
+                     <select id="product-category" class="w-full p-3 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"></select>
                 </div>
                 <div>
-                    <!-- ALTERAÇÃO AQUI: de input de ficheiro para input de URL -->
-                    <label for="product-image-url" class="block text-sm font-medium text-gray-600 mb-1">Link (URL) da Fotografia</label>
-                    <input type="url" id="product-image-url" placeholder="https://exemplo.com/imagem.png" class="w-full p-3 border rounded-md">
+                    <label for="product-image-url" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Link (URL) da Fotografia</label>
+                    <input type="url" id="product-image-url" placeholder="https://exemplo.com/imagem.png" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                     <img id="image-preview" src="" class="mt-2 h-32 rounded-md hidden"/>
                 </div>
             </div>
             <div class="flex justify-end mt-6 space-x-4">
-                <button id="cancel-modal-btn" class="text-gray-600 px-4 py-2 rounded-md">Cancelar</button>
+                <button id="cancel-modal-btn" class="text-gray-600 dark:text-gray-300 px-4 py-2 rounded-md">Cancelar</button>
                 <button id="save-product-btn" class="bg-orange-500 text-white px-4 py-2 rounded-md">Guardar</button>
             </div>
         </div>
@@ -107,4 +115,3 @@
     <script type="module" src="script.js"></script>
 </body>
 </html>
-

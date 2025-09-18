@@ -1,3 +1,23 @@
+// --- LÓGICA DE TEMA (DARK MODE) ---
+// Função que aplica o tema (adiciona ou remove a classe 'dark' do <html>)
+const applyTheme = (isDark) => {
+    if (isDark) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+};
+
+// Verifica a preferência do sistema ao carregar a página
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+applyTheme(prefersDark.matches);
+
+// Ouve por mudanças na preferência do sistema para adaptar em tempo real
+prefersDark.addEventListener('change', (event) => {
+    applyTheme(event.matches);
+});
+
+
 // --- SDKs DO FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
@@ -9,7 +29,8 @@ async function getFirebaseConfig() {
     try {
         const response = await fetch('/api/config');
         if (!response.ok) {
-            throw new Error(`O servidor respondeu com o status: ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(errorData.message || `O servidor respondeu com o status: ${response.status}`);
         }
         return response.json();
     } catch (error) {
@@ -102,12 +123,12 @@ async function initialize() {
 
                 allCategories.forEach(cat => {
                     const item = document.createElement('div');
-                    item.className = "flex justify-between items-center p-2 bg-gray-50 rounded-md";
+                    item.className = "flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded-md";
                     item.innerHTML = `
-                        <span class="text-gray-700">${cat.name}</span>
+                        <span class="text-gray-700 dark:text-gray-200">${cat.name}</span>
                         <div class="space-x-2">
-                           <button class="edit-cat-btn text-sm text-blue-500" data-id="${cat.id}" data-name="${cat.name}">Editar</button>
-                           <button class="delete-cat-btn text-sm text-red-500" data-id="${cat.id}">X</button>
+                           <button class="edit-cat-btn text-sm text-blue-500 hover:text-blue-400" data-id="${cat.id}" data-name="${cat.name}">Editar</button>
+                           <button class="delete-cat-btn text-sm text-red-500 hover:text-red-400" data-id="${cat.id}">X</button>
                         </div>
                     `;
                     categoryList.appendChild(item);
@@ -169,19 +190,19 @@ async function initialize() {
             allCategories.forEach(cat => {
                 const productsInCategory = allProducts.filter(p => p.categoryId === cat.id);
                 if (productsInCategory.length > 0) {
-                    let categorySection = `<div class="mb-6"><h3 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">${cat.name}</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+                    let categorySection = `<div class="mb-6"><h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200 border-b dark:border-gray-600 pb-2 mb-4">${cat.name}</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
                     productsInCategory.forEach(product => {
                         categorySection += `
-                            <div class="bg-white p-4 rounded-lg shadow-sm flex">
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm flex">
                                 <img src="${product.imageUrl || 'https://placehold.co/100x100'}" class="w-20 h-20 rounded-md object-cover mr-4">
                                 <div class="flex-grow">
-                                    <h4 class="font-semibold">${product.name}</h4>
-                                    <p class="text-sm text-gray-500">${(product.price || 0).toFixed(2)} €</p>
+                                    <h4 class="font-semibold text-gray-800 dark:text-gray-100">${product.name}</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">${(product.price || 0).toFixed(2)} €</p>
                                 </div>
                                 <div class="flex flex-col items-end justify-between">
                                     <div class="space-x-2">
-                                        <button class="edit-btn text-sm text-blue-500" data-id="${product.id}">Editar</button>
-                                        <button class="delete-btn text-sm text-red-500" data-id="${product.id}">Remover</button>
+                                        <button class="edit-btn text-sm text-blue-500 hover:text-blue-400" data-id="${product.id}">Editar</button>
+                                        <button class="delete-btn text-sm text-red-500 hover:text-red-400" data-id="${product.id}">Remover</button>
                                     </div>
                                 </div>
                             </div>
@@ -291,4 +312,3 @@ async function initialize() {
 }
 
 initialize();
-
