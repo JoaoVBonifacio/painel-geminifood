@@ -1,12 +1,9 @@
-// ✅ CORREÇÃO: Importa a versão correta para o navegador
-import { upload } from 'https://cdn.jsdelivr.net/npm/@vercel/blob@0.23.2/dist/index.browser.js';
+// A linha de import problemática foi removida.
 
 // --- SDKs DO FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-
-// --- O resto do ficheiro permanece como estava, mas incluí-o por completo para garantir ---
 
 async function getFirebaseConfig() {
     try {
@@ -235,8 +232,7 @@ async function initialize() {
 
         document.getElementById('add-product-btn').addEventListener('click', () => openModal());
         document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
-        
-        // ✅ LÓGICA DE UPLOAD DIRETO DO CLIENTE
+
         document.getElementById('save-product-btn').addEventListener('click', async () => {
             const id = document.getElementById('product-id').value;
             const imageFile = document.getElementById('product-image-file').files[0];
@@ -255,22 +251,30 @@ async function initialize() {
 
             const button = document.getElementById('save-product-btn');
             button.disabled = true;
+            button.textContent = "A guardar...";
 
             try {
                 if (imageFile) {
                     button.textContent = "A carregar imagem...";
-
-                    const newBlob = await upload(imageFile.name, imageFile, {
-                        access: 'public',
-                        handleUploadUrl: '/api/upload',
+                    
+                    const response = await fetch(`/api/upload`, {
+                        method: 'POST',
+                        headers: { 'x-vercel-filename': imageFile.name },
+                        body: imageFile,
                     });
 
+                    if (!response.ok) {
+                        const errorDetails = await response.json();
+                        throw new Error(errorDetails.message || 'Falha no upload da imagem.');
+                    }
+
+                    const newBlob = await response.json();
                     imageUrl = newBlob.url;
                 } else if (id) {
                     const existingProduct = allProducts.find(p => p.id === id);
                     imageUrl = existingProduct?.imageUrl || '';
                 }
-                
+
                 data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
 
                 button.textContent = "A guardar produto...";
@@ -288,8 +292,7 @@ async function initialize() {
                 alert("Erro ao guardar: " + error.message);
             } finally { 
                 button.disabled = false;
-                button.textContent = "Guardar";
-                document.getElementById('product-image-file').value = '';
+                button.textContent = "Guardar"; 
             }
         });
 
