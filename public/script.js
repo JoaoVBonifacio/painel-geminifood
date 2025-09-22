@@ -1,22 +1,12 @@
-// --- LÓGICA DE TEMA (DARK MODE) ---
-const applyTheme = (isDark) => {
-    if (isDark) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-};
+// ✅ LINHA CORRIGIDA ✅
+import { upload } from 'https://cdn.jsdelivr.net/npm/@vercel/blob/dist/client.js';
 
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-applyTheme(prefersDark.matches);
-prefersDark.addEventListener('change', (event) => applyTheme(event.matches));
-
+// --- O RESTO DO FICHEIRO PERMANECE IGUAL ---
 
 // --- SDKs DO FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-import { upload } from 'https://cdn.jsdelivr.net/npm/@vercel/blob@0.23.2/dist/client/index.browser.js';
 
 async function getFirebaseConfig() {
     try {
@@ -250,67 +240,66 @@ async function initialize() {
 
         document.getElementById('add-product-btn').addEventListener('click', () => openModal());
         document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
-        
-        // ===== BOTÃO DE GUARDAR PRODUTO (CORRIGIDO) =====
+
         document.getElementById('save-product-btn').addEventListener('click', async () => {
-    const id = document.getElementById('product-id').value;
-    const imageFile = document.getElementById('product-image-file').files[0];
-    let imageUrl = '';
+            const id = document.getElementById('product-id').value;
+            const imageFile = document.getElementById('product-image-file').files[0];
+            let imageUrl = '';
 
-    const data = {
-        name: document.getElementById('product-name').value,
-        description: document.getElementById('product-desc').value,
-        price: parseFloat(document.getElementById('product-price').value),
-        categoryId: document.getElementById('product-category').value,
-    };
+            const data = {
+                name: document.getElementById('product-name').value,
+                description: document.getElementById('product-desc').value,
+                price: parseFloat(document.getElementById('product-price').value),
+                categoryId: document.getElementById('product-category').value,
+            };
 
-    if (!data.name || isNaN(data.price) || !data.categoryId) {
-        return alert("Nome, preço e categoria são obrigatórios.");
-    }
+            if (!data.name || isNaN(data.price) || !data.categoryId) {
+                return alert("Nome, preço e categoria são obrigatórios.");
+            }
 
-    const button = document.getElementById('save-product-btn');
-    button.disabled = true;
+            const button = document.getElementById('save-product-btn');
+            button.disabled = true;
 
-    try {
-        // 1. Se um novo ficheiro foi selecionado, faz o upload direto para o Blob
-        if (imageFile) {
-            button.textContent = "A carregar imagem...";
+            try {
+                // 1. Se um novo ficheiro foi selecionado, faz o upload direto para o Blob
+                if (imageFile) {
+                    button.textContent = "A carregar imagem...";
 
-            const newBlob = await upload(imageFile.name, imageFile, {
-                access: 'public',
-                handleUploadUrl: '/api/upload', // A nossa API que gera a autorização
-            });
+                    const newBlob = await upload(imageFile.name, imageFile, {
+                        access: 'public',
+                        handleUploadUrl: '/api/upload', // A nossa API que gera a autorização
+                    });
 
-            imageUrl = newBlob.url; // URL final da imagem
-        } else if (id) {
-            // Se não houver ficheiro novo, mantém a URL antiga ao editar
-            const existingProduct = allProducts.find(p => p.id === id);
-            imageUrl = existingProduct?.imageUrl || '';
-        }
-        
-        // 2. Adiciona o URL da imagem aos dados do produto
-        data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
+                    imageUrl = newBlob.url; // URL final da imagem
+                } else if (id) {
+                    // Se não houver ficheiro novo, mantém a URL antiga ao editar
+                    const existingProduct = allProducts.find(p => p.id === id);
+                    imageUrl = existingProduct?.imageUrl || '';
+                }
+                
+                // 2. Adiciona o URL da imagem aos dados do produto
+                data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
 
-        // 3. Guarda os dados do produto no Firestore (como antes)
-        button.textContent = "A guardar produto...";
-        if (id) {
-            const productRef = doc(db, "products", id);
-            await updateDoc(productRef, data);
-        } else {
-            await addDoc(productsRef, data);
-        }
-        
-        closeModal();
+                // 3. Guarda os dados do produto no Firestore (como antes)
+                button.textContent = "A guardar produto...";
+                if (id) {
+                    const productRef = doc(db, "products", id);
+                    await updateDoc(productRef, data);
+                } else {
+                    await addDoc(productsRef, data);
+                }
+                
+                closeModal();
 
-    } catch (error) { 
-        console.error("Erro ao guardar produto:", error);
-        alert("Erro ao guardar: " + error.message);
-    } finally { 
-        button.disabled = false;
-        button.textContent = "Guardar";
-        document.getElementById('product-image-file').value = '';
-    }
-});
+            } catch (error) { 
+                console.error("Erro ao guardar produto:", error);
+                alert("Erro ao guardar: " + error.message);
+            } finally { 
+                button.disabled = false;
+                button.textContent = "Guardar";
+                document.getElementById('product-image-file').value = '';
+            }
+        });
 
         document.getElementById('product-list').addEventListener('click', async (e) => {
             const id = e.target.dataset.id;
