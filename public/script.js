@@ -3,7 +3,6 @@ const themeToggleButton = document.getElementById('theme-toggle-btn');
 const lightIcon = document.getElementById('theme-icon-light');
 const darkIcon = document.getElementById('theme-icon-dark');
 
-// Função para aplicar o tema e atualizar os ícones
 function applyTheme(isDark) {
     if (isDark) {
         document.documentElement.classList.add('dark');
@@ -16,58 +15,58 @@ function applyTheme(isDark) {
     }
 }
 
-// Verifica o tema guardado no localStorage ou a preferência do sistema
 const savedTheme = localStorage.getItem('theme');
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
 if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
     applyTheme(true);
 } else {
     applyTheme(false);
 }
-
-// Adiciona o evento de clique ao botão
 themeToggleButton.addEventListener('click', () => {
     const isDarkMode = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     applyTheme(isDarkMode);
 });
 
-
 // --- SDKs DO FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-async function getFirebaseConfig() {
+// --- VARIÁVEIS GLOBAIS ---
+let cloudinaryConfig = {};
+
+async function getAppConfig() {
     try {
         const response = await fetch('/api/config');
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || `O servidor respondeu com o status: ${response.status}`);
         }
-        return response.json();
+        const config = await response.json();
+        cloudinaryConfig = config.cloudinary; // Guarda a configuração do Cloudinary
+        return config.firebase;
     } catch (error) {
-        console.error("Falha ao buscar configuração do Firebase:", error);
+        console.error("Falha ao buscar configuração:", error);
         throw new Error("Não foi possível carregar as configurações do servidor.");
     }
 }
 
 async function initialize() {
     try {
-        const firebaseConfig = await getFirebaseConfig();
+        const firebaseConfig = await getAppConfig();
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
+
         const settingsRef = doc(db, "settings", "main");
         const productsRef = collection(db, "products");
         const categoriesRef = collection(db, "categories");
 
         let allCategories = [];
         let allProducts = [];
-        
+
         onAuthStateChanged(auth, user => {
             const loginScreen = document.getElementById('login-screen');
             const mainPanel = document.getElementById('main-panel');
@@ -82,7 +81,7 @@ async function initialize() {
                 mainPanel.classList.add('hidden');
             }
         });
-        
+
         document.getElementById('login-btn').addEventListener('click', () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -93,16 +92,22 @@ async function initialize() {
                 .catch(error => {
                     if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                         createUserWithEmailAndPassword(auth, email, password)
-                           .catch(err => { authError.textContent = "Erro ao criar conta: " + err.message; authError.classList.remove('hidden'); });
-                    } else { authError.textContent = error.message; authError.classList.remove('hidden'); }
+                            .catch(err => {
+                                authError.textContent = "Erro ao criar conta: " + err.message;
+                                authError.classList.remove('hidden');
+                            });
+                    } else {
+                        authError.textContent = error.message;
+                        authError.classList.remove('hidden');
+                    }
                 });
         });
 
         document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-        
+
         async function loadSettings() {
             const docSnap = await getDoc(settingsRef);
-            if(docSnap.exists()) {
+            if (docSnap.exists()) {
                 const settings = docSnap.data();
                 document.getElementById('whatsapp-number').value = settings.whatsappNumber || '';
                 document.getElementById('whatsapp-message').value = settings.whatsappMessage || '*Novo Pedido* 🍔\n\n*Cliente:* {cliente}\n*Itens:*\n{itens}\n\n*Morada:*\n{morada}\n*Pagamento:* {pagamento}\n*Total: {total}*';
@@ -116,9 +121,9 @@ async function initialize() {
                 whatsappMessage: document.getElementById('whatsapp-message').value,
                 minimumOrder: parseFloat(document.getElementById('minimum-order').value) || 0
             };
-            setDoc(settingsRef, data, { merge: true })
-                .then(() => alert("Configurações guardadas!"))
-                .catch(err => alert("Erro: " + err.message));
+            setDoc(settingsRef, data, {
+                merge: true
+            }).then(() => alert("Configurações guardadas!")).catch(err => alert("Erro: " + err.message));
         });
 
         function listenToCategories() {
@@ -128,18 +133,14 @@ async function initialize() {
                 const categorySelect = document.getElementById('product-category');
                 categoryList.innerHTML = '';
                 categorySelect.innerHTML = '<option value="">-- Selecione uma categoria --</option>';
-                allCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+                allCategories = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
                 allCategories.forEach(cat => {
                     const item = document.createElement('div');
                     item.className = "flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700 rounded-md";
-                    item.innerHTML = `
-                        <span class="text-gray-700 dark:text-gray-200">${cat.name}</span>
-                        <div class="space-x-2">
-                           <button class="edit-cat-btn text-sm text-blue-500 hover:text-blue-400" data-id="${cat.id}" data-name="${cat.name}">Editar</button>
-                           <button class="delete-cat-btn text-sm text-red-500 hover:text-red-400" data-id="${cat.id}">X</button>
-                        </div>
-                    `;
+                    item.innerHTML = `<span class="text-gray-700 dark:text-gray-200">${cat.name}</span><div class="space-x-2"><button class="edit-cat-btn text-sm text-blue-500 hover:text-blue-400" data-id="${cat.id}" data-name="${cat.name}">Editar</button><button class="delete-cat-btn text-sm text-red-500 hover:text-red-400" data-id="${cat.id}">X</button></div>`;
                     categoryList.appendChild(item);
                     const option = document.createElement('option');
                     option.value = cat.id;
@@ -153,32 +154,34 @@ async function initialize() {
         document.getElementById('add-category-btn').addEventListener('click', async () => {
             const input = document.getElementById('new-category-name');
             const name = input.value.trim();
-            if(name) {
-                await addDoc(categoriesRef, { name });
+            if (name) {
+                await addDoc(categoriesRef, {
+                    name
+                });
                 input.value = '';
             }
         });
 
         document.getElementById('category-list').addEventListener('click', async (e) => {
             const id = e.target.dataset.id;
-            if(!id) return;
+            if (!id) return;
             const categoryDocRef = doc(db, 'categories', id);
-
-            if(e.target.classList.contains('edit-cat-btn')) {
+            if (e.target.classList.contains('edit-cat-btn')) {
                 const newName = prompt("Novo nome para a categoria:", e.target.dataset.name);
-                if(newName && newName.trim()) {
-                    await updateDoc(categoryDocRef, { name: newName.trim() });
+                if (newName && newName.trim()) {
+                    await updateDoc(categoryDocRef, {
+                        name: newName.trim()
+                    });
                 }
             }
-
-            if(e.target.classList.contains('delete-cat-btn')) {
+            if (e.target.classList.contains('delete-cat-btn')) {
                 const q = query(productsRef, where("categoryId", "==", id));
                 const productsInCategory = await getDocs(q);
                 if (!productsInCategory.empty) {
                     alert("Não pode remover esta categoria pois existem produtos associados a ela.");
                     return;
                 }
-                if(confirm("Tem a certeza que quer remover esta categoria?")) {
+                if (confirm("Tem a certeza que quer remover esta categoria?")) {
                     await deleteDoc(categoryDocRef);
                 }
             }
@@ -202,7 +205,10 @@ async function initialize() {
 
         function listenToProducts() {
             onSnapshot(productsRef, snapshot => {
-                allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allProducts = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
                 renderProductList();
             });
         }
@@ -215,21 +221,7 @@ async function initialize() {
                 if (productsInCategory.length > 0) {
                     let categorySection = `<div class="mb-6"><h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200 border-b dark:border-gray-600 pb-2 mb-4">${cat.name}</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
                     productsInCategory.forEach(product => {
-                        categorySection += `
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm flex">
-                                <img src="${product.imageUrl || 'https://placehold.co/100x100/cccccc/ffffff?text=Sem+Foto'}" alt="${product.name}" class="w-20 h-20 rounded-md object-cover mr-4">
-                                <div class="flex-grow">
-                                    <h4 class="font-semibold text-gray-800 dark:text-gray-100">${product.name}</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">${(product.price || 0).toFixed(2)} €</p>
-                                </div>
-                                <div class="flex flex-col items-end justify-between">
-                                    <div class="space-x-2">
-                                        <button class="edit-btn text-sm text-blue-500 hover:text-blue-400" data-id="${product.id}">Editar</button>
-                                        <button class="delete-btn text-sm text-red-500 hover:text-red-400" data-id="${product.id}">Remover</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                        categorySection += `<div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm flex"><img src="${product.imageUrl || 'https://placehold.co/100x100/cccccc/ffffff?text=Sem+Foto'}" alt="${product.name}" class="w-20 h-20 rounded-md object-cover mr-4"><div class="flex-grow"><h4 class="font-semibold text-gray-800 dark:text-gray-100">${product.name}</h4><p class="text-sm text-gray-500 dark:text-gray-400">${(product.price || 0).toFixed(2)} €</p></div><div class="flex flex-col items-end justify-between"><div class="space-x-2"><button class="edit-btn text-sm text-blue-500 hover:text-blue-400" data-id="${product.id}">Editar</button><button class="delete-btn text-sm text-red-500 hover:text-red-400" data-id="${product.id}">Remover</button></div></div></div>`;
                     });
                     categorySection += `</div></div>`;
                     productListContainer.innerHTML += categorySection;
@@ -239,22 +231,20 @@ async function initialize() {
         
         const openModal = (product = null, id = null) => {
             document.getElementById('product-id').value = id || '';
-            document.getElementById('product-name').value = product?.name || '';
-            document.getElementById('product-desc').value = product?.description || '';
-            document.getElementById('product-price').value = product?.price || '';
-            document.getElementById('product-category').value = product?.categoryId || '';
+            document.getElementById('product-name').value = product ? .name || '';
+            document.getElementById('product-desc').value = product ? .description || '';
+            document.getElementById('product-price').value = product ? .price || '';
+            document.getElementById('product-category').value = product ? .categoryId || '';
             document.getElementById('product-image-file').value = '';
             document.getElementById('modal-title').textContent = id ? 'Editar Produto' : 'Adicionar Novo Produto';
-            
             const preview = document.getElementById('image-preview');
-            if (product?.imageUrl) {
+            if (product ? .imageUrl) {
                 preview.src = product.imageUrl;
                 preview.classList.remove('hidden');
-            } else { 
+            } else {
                 preview.src = '';
                 preview.classList.add('hidden');
             }
-            
             document.getElementById('product-modal').classList.remove('hidden');
             document.getElementById('product-modal').classList.add('flex');
         };
@@ -267,7 +257,7 @@ async function initialize() {
         document.getElementById('add-product-btn').addEventListener('click', () => openModal());
         document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
 
-        // LÓGICA DE UPLOAD ATUALIZADA PARA O CLOUDINARY
+        // ✅ LÓGICA DE UPLOAD DIRETO PARA O CLOUDINARY
         document.getElementById('save-product-btn').addEventListener('click', async () => {
             const id = document.getElementById('product-id').value;
             const imageFile = document.getElementById('product-image-file').files[0];
@@ -286,48 +276,50 @@ async function initialize() {
 
             const button = document.getElementById('save-product-btn');
             button.disabled = true;
-            button.textContent = "A guardar...";
 
             try {
                 if (imageFile) {
                     button.textContent = "A carregar imagem...";
-                    
-                    const response = await fetch(`/api/upload`, {
+
+                    const formData = new FormData();
+                    formData.append('file', imageFile);
+                    formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+
+                    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`, {
                         method: 'POST',
-                        headers: { 'x-vercel-filename': imageFile.name },
-                        body: imageFile,
+                        body: formData,
                     });
 
                     if (!response.ok) {
-                        const errorDetails = await response.json();
-                        throw new Error(errorDetails.message || 'Falha no upload da imagem.');
+                        throw new Error('Falha no upload direto para o Cloudinary.');
                     }
 
                     const result = await response.json();
-                    imageUrl = result.url;
+                    imageUrl = result.secure_url;
+
                 } else if (id) {
                     const existingProduct = allProducts.find(p => p.id === id);
-                    imageUrl = existingProduct?.imageUrl || '';
+                    imageUrl = existingProduct ? .imageUrl || '';
                 }
 
                 data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
 
                 button.textContent = "A guardar produto...";
                 if (id) {
-                    const productRef = doc(db, "products", id);
-                    await updateDoc(productRef, data);
+                    await updateDoc(doc(db, "products", id), data);
                 } else {
                     await addDoc(productsRef, data);
                 }
-                
+
                 closeModal();
 
-            } catch (error) { 
+            } catch (error) {
                 console.error("Erro ao guardar produto:", error);
                 alert("Erro ao guardar: " + error.message);
-            } finally { 
+            } finally {
                 button.disabled = false;
-                button.textContent = "Guardar"; 
+                button.textContent = "Guardar";
+                document.getElementById('product-image-file').value = '';
             }
         });
 
@@ -335,7 +327,6 @@ async function initialize() {
             const id = e.target.dataset.id;
             if (!id) return;
             const productRef = doc(db, "products", id);
-
             if (e.target.classList.contains('edit-btn')) {
                 const docSnap = await getDoc(productRef);
                 openModal(docSnap.data(), id);
@@ -349,7 +340,7 @@ async function initialize() {
 
     } catch (error) {
         console.error("Erro Crítico na Inicialização:", error);
-        document.body.innerHTML = `<div class="text-red-500 p-8 text-center"><h1>Erro Crítico na Inicialização</h1><p>${error.message}</p><p>Verifique as suas Variáveis de Ambiente na Vercel.</p></div>`;
+        document.body.innerHTML = `<div class="text-red-500 p-8 text-center"><h1>Erro Crítico na Inicialização</h1><p>${error.message}</p></div>`;
     }
 }
 
