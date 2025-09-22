@@ -1,5 +1,4 @@
 // --- LÓGICA DE TEMA (DARK MODE) ---
-// Função que aplica o tema (adiciona ou remove a classe 'dark' do <html>)
 const applyTheme = (isDark) => {
     if (isDark) {
         document.documentElement.classList.add('dark');
@@ -8,23 +7,16 @@ const applyTheme = (isDark) => {
     }
 };
 
-// Verifica a preferência do sistema ao carregar a página
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 applyTheme(prefersDark.matches);
-
-// Ouve por mudanças na preferência do sistema para adaptar em tempo real
-prefersDark.addEventListener('change', (event) => {
-    applyTheme(event.matches);
-});
+prefersDark.addEventListener('change', (event) => applyTheme(event.matches));
 
 
 // --- SDKs DO FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-// A importação do Storage foi REMOVIDA intencionalmente
+import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// Esta função vai buscar as chaves secretas ao nosso "cofre" na Vercel
 async function getFirebaseConfig() {
     try {
         const response = await fetch('/api/config');
@@ -39,7 +31,6 @@ async function getFirebaseConfig() {
     }
 }
 
-// A função principal que arranca a aplicação
 async function initialize() {
     try {
         const firebaseConfig = await getFirebaseConfig();
@@ -176,20 +167,21 @@ async function initialize() {
         });
 
         // --- LÓGICA DE PRODUTOS ---
-
-        // Adicione este listener em qualquer lado na secção de lógica de produtos
-document.getElementById('product-image-file').addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
+        document.getElementById('product-image-file').addEventListener('change', e => {
+            const file = e.target.files[0];
             const preview = document.getElementById('image-preview');
-            preview.src = e.target.result;
-            preview.classList.remove('hidden');
-        }
-        reader.readAsDataURL(file);
-    }
-});
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.src = event.target.result;
+                    preview.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+            }
+        });
 
         function listenToProducts() {
             onSnapshot(productsRef, snapshot => {
@@ -201,7 +193,6 @@ document.getElementById('product-image-file').addEventListener('change', e => {
         function renderProductList() {
             const productListContainer = document.getElementById('product-list');
             productListContainer.innerHTML = '';
-
             allCategories.forEach(cat => {
                 const productsInCategory = allProducts.filter(p => p.categoryId === cat.id);
                 if (productsInCategory.length > 0) {
@@ -209,7 +200,7 @@ document.getElementById('product-image-file').addEventListener('change', e => {
                     productsInCategory.forEach(product => {
                         categorySection += `
                             <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm flex">
-                                <img src="${product.imageUrl || 'https://placehold.co/100x100'}" class="w-20 h-20 rounded-md object-cover mr-4">
+                                <img src="${product.imageUrl || 'https://placehold.co/100x100/cccccc/ffffff?text=Sem+Foto'}" alt="${product.name}" class="w-20 h-20 rounded-md object-cover mr-4">
                                 <div class="flex-grow">
                                     <h4 class="font-semibold text-gray-800 dark:text-gray-100">${product.name}</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">${(product.price || 0).toFixed(2)} €</p>
@@ -235,10 +226,10 @@ document.getElementById('product-image-file').addEventListener('change', e => {
             document.getElementById('product-desc').value = product?.description || '';
             document.getElementById('product-price').value = product?.price || '';
             document.getElementById('product-category').value = product?.categoryId || '';
-            document.getElementById('product-image-url').value = product?.imageUrl || ''; // Campo de URL
+            document.getElementById('product-image-file').value = ''; // Limpa o campo de ficheiro
             document.getElementById('modal-title').textContent = id ? 'Editar Produto' : 'Adicionar Novo Produto';
+            
             const preview = document.getElementById('image-preview');
-
             if (product?.imageUrl) {
                 preview.src = product.imageUrl;
                 preview.classList.remove('hidden');
@@ -259,78 +250,78 @@ document.getElementById('product-image-file').addEventListener('change', e => {
         document.getElementById('add-product-btn').addEventListener('click', () => openModal());
         document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
         
-        document.getElementById('product-image-url').addEventListener('input', e => {
-            const preview = document.getElementById('image-preview');
-            const url = e.target.value;
-            if (url) {
-                preview.src = url;
-                preview.classList.remove('hidden');
-            } else {
-                preview.classList.add('hidden');
+        // ===== BOTÃO DE GUARDAR PRODUTO (CORRIGIDO) =====
+        document.getElementById('save-product-btn').addEventListener('click', async () => {
+            const id = document.getElementById('product-id').value;
+            const imageFile = document.getElementById('product-image-file').files[0];
+            let imageUrl = ''; // Começa vazio
+
+            const data = {
+                name: document.getElementById('product-name').value,
+                description: document.getElementById('product-desc').value,
+                price: parseFloat(document.getElementById('product-price').value),
+                categoryId: document.getElementById('product-category').value,
+            };
+
+            if (!data.name || isNaN(data.price) || !data.categoryId) {
+                return alert("Nome, preço e categoria são obrigatórios.");
+            }
+
+            const button = document.getElementById('save-product-btn');
+            button.disabled = true;
+            button.textContent = "A guardar...";
+
+            try {
+                // 1. Se um novo ficheiro foi selecionado, faz o upload
+                if (imageFile) {
+                    button.textContent = "A carregar imagem...";
+                    
+                    // CORREÇÃO: Envia o nome do ficheiro no header, como a API espera.
+                    const response = await fetch(`/api/upload`, {
+                        method: 'POST',
+                        headers: {
+                            'x-vercel-filename': imageFile.name // A API espera por este header
+                        },
+                        body: imageFile,
+                    });
+
+                    if (!response.ok) {
+                        const errorDetails = await response.json();
+                        throw new Error(errorDetails.message || 'Falha no upload da imagem.');
+                    }
+
+                    const newBlob = await response.json();
+                    imageUrl = newBlob.url; // URL público da imagem guardada no Vercel Blob
+                }
+
+                // Se não houver imagem nova, verifica se já existe uma antiga (no modo de edição)
+                if (!imageUrl && id) {
+                    const existingProduct = allProducts.find(p => p.id === id);
+                    imageUrl = existingProduct?.imageUrl || '';
+                }
+
+                // 2. Adiciona o URL da imagem aos dados
+                data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
+
+                // 3. Guarda os dados no Firestore
+                button.textContent = "A guardar produto...";
+                if (id) {
+                    const productRef = doc(db, "products", id);
+                    await updateDoc(productRef, data);
+                } else {
+                    await addDoc(productsRef, data);
+                }
+                
+                closeModal();
+
+            } catch (error) { 
+                console.error("Erro ao guardar produto:", error);
+                alert("Erro ao guardar: " + error.message);
+            } finally { 
+                button.disabled = false;
+                button.textContent = "Guardar"; 
             }
         });
-        
-        document.getElementById('save-product-btn').addEventListener('click', async () => {
-    const id = document.getElementById('product-id').value;
-    const imageFile = document.getElementById('product-image-file').files[0];
-    let imageUrl = document.getElementById('product-image-url').value; // URL existente
-
-    const data = {
-        name: document.getElementById('product-name').value,
-        description: document.getElementById('product-desc').value,
-        price: parseFloat(document.getElementById('product-price').value),
-        categoryId: document.getElementById('product-category').value,
-    };
-
-    if (!data.name || isNaN(data.price) || !data.categoryId) {
-        return alert("Nome, preço e categoria são obrigatórios.");
-    }
-
-    const button = document.getElementById('save-product-btn');
-    button.disabled = true;
-    button.textContent = "A guardar...";
-
-    try {
-        // 1. Se um novo ficheiro foi selecionado, envia-o para a nossa API
-        if (imageFile) {
-            button.textContent = "A carregar imagem...";
-            
-            // Envia o ficheiro para a nossa API route /api/upload
-            const response = await fetch(`/api/upload?filename=${imageFile.name}`, {
-                method: 'POST',
-                body: imageFile,
-            });
-
-            if (!response.ok) {
-                throw new Error('Falha no upload da imagem.');
-            }
-
-            const newBlob = await response.json();
-            imageUrl = newBlob.url; // O URL público da imagem guardada
-        }
-
-        // 2. Adiciona o URL da imagem aos dados
-        data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
-
-        // 3. Guarda os dados no Firestore (exatamente como antes)
-        button.textContent = "A guardar produto...";
-        if (id) {
-            const productRef = doc(db, "products", id);
-            await updateDoc(productRef, data);
-        } else {
-            await addDoc(productsRef, data);
-        }
-        
-        closeModal();
-
-    } catch (error) { 
-        console.error("Erro ao guardar produto:", error);
-        alert("Erro ao guardar: " + error.message);
-    } finally { 
-        button.disabled = false;
-        button.textContent = "Guardar"; 
-    }
-});
 
         document.getElementById('product-list').addEventListener('click', async (e) => {
             const id = e.target.dataset.id;
