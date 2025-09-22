@@ -231,14 +231,14 @@ async function initialize() {
         
         const openModal = (product = null, id = null) => {
             document.getElementById('product-id').value = id || '';
-            document.getElementById('product-name').value = product ? .name || '';
-            document.getElementById('product-desc').value = product ? .description || '';
-            document.getElementById('product-price').value = product ? .price || '';
-            document.getElementById('product-category').value = product ? .categoryId || '';
+            document.getElementById('product-name').value = product ?.name || '';
+            document.getElementById('product-desc').value = product ?.description || '';
+            document.getElementById('product-price').value = product ?.price || '';
+            document.getElementById('product-category').value = product ?.categoryId || '';
             document.getElementById('product-image-file').value = '';
             document.getElementById('modal-title').textContent = id ? 'Editar Produto' : 'Adicionar Novo Produto';
             const preview = document.getElementById('image-preview');
-            if (product ? .imageUrl) {
+            if (product ?.imageUrl) {
                 preview.src = product.imageUrl;
                 preview.classList.remove('hidden');
             } else {
@@ -299,7 +299,7 @@ async function initialize() {
 
                 } else if (id) {
                     const existingProduct = allProducts.find(p => p.id === id);
-                    imageUrl = existingProduct ? .imageUrl || '';
+                    imageUrl = existingProduct ?.imageUrl || '';
                 }
 
                 data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
