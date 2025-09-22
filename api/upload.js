@@ -1,30 +1,41 @@
-import { put } from '@vercel/blob';
+import { handleUpload } from '@vercel/blob/client';
 import { NextResponse } from 'next/server';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 export default async function handler(request) {
+  const body = await request.json();
+
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    const message = 'Variável de ambiente BLOB_READ_WRITE_TOKEN não encontrada. Verifique se o Vercel Blob está corretamente conectado a este projeto.';
-    return new NextResponse(JSON.stringify({ message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-  }
-
-  const filename = request.headers['x-vercel-filename'];
-
-  if (!request.body || !filename) {
-    return new NextResponse(JSON.stringify({ message: 'Nenhum ficheiro para upload.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    return new NextResponse(
+      JSON.stringify({ message: 'O token de armazenamento não está configurado.' }),
+      { status: 500 }
+    );
   }
 
   try {
-    const blob = await put(filename, request.body, {
-      access: 'public',
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async (pathname) => {
+        return {
+          // Define os tipos de ficheiro permitidos
+          allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+          // Define um payload que pode ser lido no callback
+          tokenPayload: JSON.stringify({
+            // Ex: 'userId': 'user.id'
+          }),
+        };
+      },
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
+        // Este código corre DEPOIS do upload terminar com sucesso
+        console.log('Upload para o Blob concluído!', blob, tokenPayload);
+      },
     });
-    return new NextResponse(JSON.stringify(blob), { status: 200 });
+
+    return NextResponse.json(jsonResponse);
   } catch (error) {
-    return new NextResponse(JSON.stringify({ message: 'Erro durante o upload no servidor.', error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new NextResponse(
+      JSON.stringify({ error: 'Falha ao autorizar o upload.' }),
+      { status: 500 }
+    );
   }
 }
