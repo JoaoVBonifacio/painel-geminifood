@@ -1,9 +1,10 @@
 {
-  "name": "painel-geminifood",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "@vercel/blob": "^0.23.2",
-    "next": "14.2.3"
+  "version": 2,
+  "regions": ["gru1"],
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 45,
+      "memory": 1024
+    }
   }
 }
