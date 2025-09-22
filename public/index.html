@@ -7,20 +7,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
-        darkMode: 'class', // Habilita o modo escuro baseado na classe 'dark' no HTML
+        darkMode: 'class',
         theme: {
-          extend: {
-            // Você pode adicionar extensões de tema aqui se precisar
-          }
+          extend: {}
         }
       }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/lucide-static@latest/dist/lucide.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .modal-bg { background-color: rgba(0,0,0,0.5); }
-        /* Transição suave de cores para uma melhor experiência */
         body, input, textarea, select, button, div, header {
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
@@ -128,9 +124,5 @@
     </div>
     
     <script type="module" src="script.js"></script>
-    <script>
-      // Renderiza os ícones após a página carregar
-      lucide.createIcons();
-    </script>
-</body>
+    </body>
 </html>

@@ -20,12 +20,14 @@ async function streamToBuffer(readableStream) {
 
 export const config = {
   api: {
-    bodyParser: false, // Desativamos o bodyParser para lidar com o stream do ficheiro
+    bodyParser: false,
   },
 };
 
 export default async function handler(request) {
-  const filename = request.headers.get('x-vercel-filename');
+  // ✅ CORREÇÃO AQUI: Usar a sintaxe correta para o ambiente Node.js da Vercel
+  const filename = request.headers['x-vercel-filename'];
+  
   const buffer = await streamToBuffer(request.body);
 
   if (!buffer || !filename) {
@@ -33,12 +35,11 @@ export default async function handler(request) {
   }
 
   try {
-    // Faz o upload do buffer para o Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          folder: 'cardapio', // Guarda na pasta 'cardapio' que você criou
-          public_id: filename.split('.')[0] // Usa o nome do ficheiro sem a extensão
+          folder: 'cardapio',
+          public_id: filename.split('.')[0]
         },
         (error, result) => {
           if (error) return reject(error);
@@ -47,10 +48,10 @@ export default async function handler(request) {
       ).end(buffer);
     });
 
-    // Retorna a URL segura da imagem guardada no Cloudinary
     return new NextResponse(JSON.stringify({ url: uploadResult.secure_url }), { status: 200 });
 
   } catch (error) {
+    console.error('Erro no upload para o Cloudinary:', error); // Adiciona um log mais detalhado
     return new NextResponse(JSON.stringify({ message: 'Erro no upload para o Cloudinary.', error: error.message }), { status: 500 });
   }
 }
