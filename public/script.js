@@ -39,8 +39,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// O resto do código continua exatamente o mesmo...
-
 async function getFirebaseConfig() {
     try {
         const response = await fetch('/api/config');
@@ -269,6 +267,7 @@ async function initialize() {
         document.getElementById('add-product-btn').addEventListener('click', () => openModal());
         document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
 
+        // LÓGICA DE UPLOAD ATUALIZADA PARA O CLOUDINARY
         document.getElementById('save-product-btn').addEventListener('click', async () => {
             const id = document.getElementById('product-id').value;
             const imageFile = document.getElementById('product-image-file').files[0];
@@ -304,8 +303,8 @@ async function initialize() {
                         throw new Error(errorDetails.message || 'Falha no upload da imagem.');
                     }
 
-                    const newBlob = await response.json();
-                    imageUrl = newBlob.url;
+                    const result = await response.json();
+                    imageUrl = result.url;
                 } else if (id) {
                     const existingProduct = allProducts.find(p => p.id === id);
                     imageUrl = existingProduct?.imageUrl || '';

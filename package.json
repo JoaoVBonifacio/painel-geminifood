@@ -1,8 +1,9 @@
 {
-  "version": 2,
-  "functions": {
-    "api/*.js": {
-      "maxDuration": 15
-    }
+  "name": "painel-geminifood",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "cloudinary": "^1.41.0",
+    "next": "latest"
   }
 }

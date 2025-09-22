@@ -1,32 +1,56 @@
-import { put } from '@vercel/blob';
+import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
+
+// Configura o Cloudinary com as suas chaves secretas da Vercel
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true
+});
+
+// Função para converter o stream do request em buffer
+async function streamToBuffer(readableStream) {
+  const chunks = [];
+  for await (const chunk of readableStream) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: false, // Desativamos o bodyParser para lidar com o stream do ficheiro
   },
 };
 
 export default async function handler(request) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    const message = 'Variável de ambiente BLOB_READ_WRITE_TOKEN não encontrada. Verifique se o Vercel Blob está corretamente conectado a este projeto.';
-    return new NextResponse(JSON.stringify({ message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-  }
+  const filename = request.headers.get('x-vercel-filename');
+  const buffer = await streamToBuffer(request.body);
 
-  const filename = request.headers['x-vercel-filename'];
-
-  if (!request.body || !filename) {
-    return new NextResponse(JSON.stringify({ message: 'Nenhum ficheiro para upload.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+  if (!buffer || !filename) {
+    return new NextResponse(JSON.stringify({ message: 'Nenhum ficheiro para upload.' }), { status: 400 });
   }
 
   try {
-    // ✅ ALTERAÇÃO AQUI: Adiciona o nome da pasta ao caminho do ficheiro
-    const blob = await put(`cardapio/${filename}`, request.body, {
-      access: 'public',
+    // Faz o upload do buffer para o Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: 'cardapio', // Guarda na pasta 'cardapio' que você criou
+          public_id: filename.split('.')[0] // Usa o nome do ficheiro sem a extensão
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      ).end(buffer);
     });
 
-    return new NextResponse(JSON.stringify(blob), { status: 200 });
+    // Retorna a URL segura da imagem guardada no Cloudinary
+    return new NextResponse(JSON.stringify({ url: uploadResult.secure_url }), { status: 200 });
+
   } catch (error) {
-    return new NextResponse(JSON.stringify({ message: 'Erro durante o upload no servidor.', error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new NextResponse(JSON.stringify({ message: 'Erro no upload para o Cloudinary.', error: error.message }), { status: 500 });
   }
 }
