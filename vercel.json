@@ -1,9 +1,10 @@
 {
   "version": 2,
   "functions": {
-    "api/upload.js": {
-      "maxDuration": 30,
-      "memory": 1024
+    "api/*.js": {
+      "maxDuration": 45,
+      "memory": 1024,
+      "regions": ["gru1"]
     }
   }
 }

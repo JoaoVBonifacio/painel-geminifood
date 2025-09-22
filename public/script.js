@@ -1,12 +1,11 @@
-// ✅ LINHA CORRIGIDA ✅
-import { upload } from 'https://cdn.jsdelivr.net/npm/@vercel/blob/dist/client.js';
-
-// --- O RESTO DO FICHEIRO PERMANECE IGUAL ---
+// A importação problemática foi removida.
 
 // --- SDKs DO FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+// ... (todo o código de inicialização e de lógicas de autenticação, configurações e categorias permanece o mesmo) ...
 
 async function getFirebaseConfig() {
     try {
@@ -26,7 +25,6 @@ async function initialize() {
     try {
         const firebaseConfig = await getFirebaseConfig();
 
-        // --- INICIALIZAÇÃO ---
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -38,7 +36,6 @@ async function initialize() {
         let allCategories = [];
         let allProducts = [];
         
-        // --- LÓGICA DE AUTENTICAÇÃO ---
         onAuthStateChanged(auth, user => {
             const loginScreen = document.getElementById('login-screen');
             const mainPanel = document.getElementById('main-panel');
@@ -71,7 +68,6 @@ async function initialize() {
 
         document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
         
-        // --- LÓGICA DE CONFIGURAÇÕES ---
         async function loadSettings() {
             const docSnap = await getDoc(settingsRef);
             if(docSnap.exists()) {
@@ -93,7 +89,6 @@ async function initialize() {
                 .catch(err => alert("Erro: " + err.message));
         });
 
-        // --- LÓGICA DE CATEGORIAS ---
         function listenToCategories() {
             const q = query(categoriesRef, orderBy("name"));
             onSnapshot(q, snapshot => {
@@ -157,7 +152,6 @@ async function initialize() {
             }
         });
 
-        // --- LÓGICA DE PRODUTOS ---
         document.getElementById('product-image-file').addEventListener('change', e => {
             const file = e.target.files[0];
             const preview = document.getElementById('image-preview');
@@ -217,7 +211,7 @@ async function initialize() {
             document.getElementById('product-desc').value = product?.description || '';
             document.getElementById('product-price').value = product?.price || '';
             document.getElementById('product-category').value = product?.categoryId || '';
-            document.getElementById('product-image-file').value = ''; // Limpa o campo de ficheiro
+            document.getElementById('product-image-file').value = '';
             document.getElementById('modal-title').textContent = id ? 'Editar Produto' : 'Adicionar Novo Produto';
             
             const preview = document.getElementById('image-preview');
@@ -259,28 +253,32 @@ async function initialize() {
 
             const button = document.getElementById('save-product-btn');
             button.disabled = true;
+            button.textContent = "A guardar...";
 
             try {
-                // 1. Se um novo ficheiro foi selecionado, faz o upload direto para o Blob
                 if (imageFile) {
                     button.textContent = "A carregar imagem...";
-
-                    const newBlob = await upload(imageFile.name, imageFile, {
-                        access: 'public',
-                        handleUploadUrl: '/api/upload', // A nossa API que gera a autorização
+                    
+                    const response = await fetch(`/api/upload`, {
+                        method: 'POST',
+                        headers: { 'x-vercel-filename': imageFile.name },
+                        body: imageFile,
                     });
 
-                    imageUrl = newBlob.url; // URL final da imagem
+                    if (!response.ok) {
+                        const errorDetails = await response.json();
+                        throw new Error(errorDetails.message || 'Falha no upload da imagem.');
+                    }
+
+                    const newBlob = await response.json();
+                    imageUrl = newBlob.url;
                 } else if (id) {
-                    // Se não houver ficheiro novo, mantém a URL antiga ao editar
                     const existingProduct = allProducts.find(p => p.id === id);
                     imageUrl = existingProduct?.imageUrl || '';
                 }
-                
-                // 2. Adiciona o URL da imagem aos dados do produto
+
                 data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
 
-                // 3. Guarda os dados do produto no Firestore (como antes)
                 button.textContent = "A guardar produto...";
                 if (id) {
                     const productRef = doc(db, "products", id);
@@ -296,8 +294,7 @@ async function initialize() {
                 alert("Erro ao guardar: " + error.message);
             } finally { 
                 button.disabled = false;
-                button.textContent = "Guardar";
-                document.getElementById('product-image-file').value = '';
+                button.textContent = "Guardar"; 
             }
         });
 
