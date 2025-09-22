@@ -10,7 +10,8 @@ export const config = {
 
 export default async function handler(request) {
   // O nome do ficheiro vem no header 'x-vercel-filename'
-  const filename = request.headers.get('x-vercel-filename');
+  // CORREÇÃO: Usar notação de parênteses retos para aceder ao header
+  const filename = request.headers['x-vercel-filename'];
 
   // O corpo do request (request.body) é o próprio ficheiro
   if (!request.body || !filename) {
@@ -19,7 +20,6 @@ export default async function handler(request) {
 
   try {
     // Faz o upload do ficheiro para o Vercel Blob
-    // O 'pathname' é o nome que o ficheiro terá no Blob (ex: "coca-cola.png")
     const blob = await put(filename, request.body, {
       access: 'public', // Torna o ficheiro publicamente acessível
     });
