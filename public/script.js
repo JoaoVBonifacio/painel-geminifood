@@ -176,6 +176,21 @@ async function initialize() {
         });
 
         // --- LÓGICA DE PRODUTOS ---
+
+        // Adicione este listener em qualquer lado na secção de lógica de produtos
+document.getElementById('product-image-file').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('image-preview');
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
         function listenToProducts() {
             onSnapshot(productsRef, snapshot => {
                 allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -256,38 +271,66 @@ async function initialize() {
         });
         
         document.getElementById('save-product-btn').addEventListener('click', async () => {
-            const id = document.getElementById('product-id').value;
-            const data = {
-                name: document.getElementById('product-name').value,
-                description: document.getElementById('product-desc').value,
-                price: parseFloat(document.getElementById('product-price').value),
-                categoryId: document.getElementById('product-category').value,
-                imageUrl: document.getElementById('product-image-url').value.trim()
-            };
+    const id = document.getElementById('product-id').value;
+    const imageFile = document.getElementById('product-image-file').files[0];
+    let imageUrl = document.getElementById('product-image-url').value; // URL existente
 
-            if (!data.name || isNaN(data.price) || !data.categoryId) return alert("Nome, preço e categoria são obrigatórios.");
+    const data = {
+        name: document.getElementById('product-name').value,
+        description: document.getElementById('product-desc').value,
+        price: parseFloat(document.getElementById('product-price').value),
+        categoryId: document.getElementById('product-category').value,
+    };
 
-            if (!data.imageUrl) {
-                data.imageUrl = 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
+    if (!data.name || isNaN(data.price) || !data.categoryId) {
+        return alert("Nome, preço e categoria são obrigatórios.");
+    }
+
+    const button = document.getElementById('save-product-btn');
+    button.disabled = true;
+    button.textContent = "A guardar...";
+
+    try {
+        // 1. Se um novo ficheiro foi selecionado, envia-o para a nossa API
+        if (imageFile) {
+            button.textContent = "A carregar imagem...";
+            
+            // Envia o ficheiro para a nossa API route /api/upload
+            const response = await fetch(`/api/upload?filename=${imageFile.name}`, {
+                method: 'POST',
+                body: imageFile,
+            });
+
+            if (!response.ok) {
+                throw new Error('Falha no upload da imagem.');
             }
 
-            const button = document.getElementById('save-product-btn');
-            button.disabled = true; button.textContent = "A guardar...";
+            const newBlob = await response.json();
+            imageUrl = newBlob.url; // O URL público da imagem guardada
+        }
 
-            try {
-                if (id) {
-                    const productRef = doc(db, "products", id);
-                    await updateDoc(productRef, data);
-                } else {
-                    await addDoc(productsRef, data);
-                }
-                closeModal();
-            } catch (error) { 
-                alert("Erro ao guardar: " + error.message);
-            } finally { 
-                button.disabled = false; button.textContent = "Guardar"; 
-            }
-        });
+        // 2. Adiciona o URL da imagem aos dados
+        data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
+
+        // 3. Guarda os dados no Firestore (exatamente como antes)
+        button.textContent = "A guardar produto...";
+        if (id) {
+            const productRef = doc(db, "products", id);
+            await updateDoc(productRef, data);
+        } else {
+            await addDoc(productsRef, data);
+        }
+        
+        closeModal();
+
+    } catch (error) { 
+        console.error("Erro ao guardar produto:", error);
+        alert("Erro ao guardar: " + error.message);
+    } finally { 
+        button.disabled = false;
+        button.textContent = "Guardar"; 
+    }
+});
 
         document.getElementById('product-list').addEventListener('click', async (e) => {
             const id = e.target.dataset.id;

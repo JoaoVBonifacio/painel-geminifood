@@ -100,10 +100,24 @@
                      <select id="product-category" class="w-full p-3 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"></select>
                 </div>
                 <div>
-                    <label for="product-image-url" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Link (URL) da Fotografia</label>
-                    <input type="url" id="product-image-url" placeholder="https://exemplo.com/imagem.png" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
-                    <img id="image-preview" src="" class="mt-2 h-32 rounded-md hidden"/>
-                </div>
+    <label for="product-image-url" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Link (URL) da Fotografia</label>
+    <input type="url" id="product-image-url" placeholder="https://exemplo.com/imagem.png" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+    <img id="image-preview" src="" class="mt-2 h-32 rounded-md hidden"/>
+</div>
+
+<div>
+    <label for="product-image-file" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Fotografia do Produto</label>
+    <input type="file" id="product-image-file" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400
+        file:mr-4 file:py-2 file:px-4
+        file:rounded-md file:border-0
+        file:text-sm file:font-semibold
+        file:bg-orange-50 file:text-orange-600
+        hover:file:bg-orange-100
+        dark:file:bg-gray-700 dark:file:text-gray-200 dark:hover:file:bg-gray-600
+    ">
+    <input type="hidden" id="product-image-url">
+    <img id="image-preview" src="" class="mt-2 h-32 rounded-md hidden"/>
+</div>
             </div>
             <div class="flex justify-end mt-6 space-x-4">
                 <button id="cancel-modal-btn" class="text-gray-600 dark:text-gray-300 px-4 py-2 rounded-md">Cancelar</button>
