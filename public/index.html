@@ -16,11 +16,12 @@
       }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide-static@latest/dist/lucide.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .modal-bg { background-color: rgba(0,0,0,0.5); }
         /* Transição suave de cores para uma melhor experiência */
-        body, input, textarea, select, button, div {
+        body, input, textarea, select, button, div, header {
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
     </style>
@@ -43,9 +44,16 @@
             <header class="bg-white dark:bg-gray-800 shadow-md">
                 <div class="container mx-auto px-6 py-4 flex justify-between items-center">
                     <h1 class="text-2xl font-bold text-orange-500">GeminiFood Admin</h1>
-                    <button id="logout-btn" class="text-sm text-gray-600 dark:text-gray-300 hover:text-orange-500">Sair</button>
+                    <div class="flex items-center space-x-4">
+                        <button id="theme-toggle-btn" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                           <svg id="theme-icon-light" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                           <svg id="theme-icon-dark" class="w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                        </button>
+                        <button id="logout-btn" class="text-sm text-gray-600 dark:text-gray-300 hover:text-orange-500">Sair</button>
+                    </div>
                 </div>
             </header>
+
             <main class="container mx-auto px-6 py-8">
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
                     <h3 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Configurações Gerais</h3>
@@ -120,5 +128,9 @@
     </div>
     
     <script type="module" src="script.js"></script>
+    <script>
+      // Renderiza os ícones após a página carregar
+      lucide.createIcons();
+    </script>
 </body>
 </html>

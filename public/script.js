@@ -1,9 +1,45 @@
-// A linha de import problemática foi removida.
+// --- LÓGICA DE TEMA (DARK MODE) ---
+const themeToggleButton = document.getElementById('theme-toggle-btn');
+const lightIcon = document.getElementById('theme-icon-light');
+const darkIcon = document.getElementById('theme-icon-dark');
+
+// Função para aplicar o tema e atualizar os ícones
+function applyTheme(isDark) {
+    if (isDark) {
+        document.documentElement.classList.add('dark');
+        lightIcon.classList.add('hidden');
+        darkIcon.classList.remove('hidden');
+    } else {
+        document.documentElement.classList.remove('dark');
+        lightIcon.classList.remove('hidden');
+        darkIcon.classList.add('hidden');
+    }
+}
+
+// Verifica o tema guardado no localStorage ou a preferência do sistema
+const savedTheme = localStorage.getItem('theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+    applyTheme(true);
+} else {
+    applyTheme(false);
+}
+
+// Adiciona o evento de clique ao botão
+themeToggleButton.addEventListener('click', () => {
+    const isDarkMode = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    applyTheme(isDarkMode);
+});
+
 
 // --- SDKs DO FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+// O resto do código continua exatamente o mesmo...
 
 async function getFirebaseConfig() {
     try {
