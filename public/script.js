@@ -16,6 +16,7 @@ prefersDark.addEventListener('change', (event) => applyTheme(event.matches));
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { upload } from 'https://cdn.jsdelivr.net/npm/@vercel/blob@0.23.2/dist/client/index.browser.js';
 
 async function getFirebaseConfig() {
     try {
@@ -252,76 +253,64 @@ async function initialize() {
         
         // ===== BOTÃO DE GUARDAR PRODUTO (CORRIGIDO) =====
         document.getElementById('save-product-btn').addEventListener('click', async () => {
-            const id = document.getElementById('product-id').value;
-            const imageFile = document.getElementById('product-image-file').files[0];
-            let imageUrl = ''; // Começa vazio
+    const id = document.getElementById('product-id').value;
+    const imageFile = document.getElementById('product-image-file').files[0];
+    let imageUrl = '';
 
-            const data = {
-                name: document.getElementById('product-name').value,
-                description: document.getElementById('product-desc').value,
-                price: parseFloat(document.getElementById('product-price').value),
-                categoryId: document.getElementById('product-category').value,
-            };
+    const data = {
+        name: document.getElementById('product-name').value,
+        description: document.getElementById('product-desc').value,
+        price: parseFloat(document.getElementById('product-price').value),
+        categoryId: document.getElementById('product-category').value,
+    };
 
-            if (!data.name || isNaN(data.price) || !data.categoryId) {
-                return alert("Nome, preço e categoria são obrigatórios.");
-            }
+    if (!data.name || isNaN(data.price) || !data.categoryId) {
+        return alert("Nome, preço e categoria são obrigatórios.");
+    }
 
-            const button = document.getElementById('save-product-btn');
-            button.disabled = true;
-            button.textContent = "A guardar...";
+    const button = document.getElementById('save-product-btn');
+    button.disabled = true;
 
-            try {
-                // 1. Se um novo ficheiro foi selecionado, faz o upload
-                if (imageFile) {
-                    button.textContent = "A carregar imagem...";
-                    
-                    // CORREÇÃO: Envia o nome do ficheiro no header, como a API espera.
-                    const response = await fetch(`/api/upload`, {
-                        method: 'POST',
-                        headers: {
-                            'x-vercel-filename': imageFile.name // A API espera por este header
-                        },
-                        body: imageFile,
-                    });
+    try {
+        // 1. Se um novo ficheiro foi selecionado, faz o upload direto para o Blob
+        if (imageFile) {
+            button.textContent = "A carregar imagem...";
 
-                    if (!response.ok) {
-                        const errorDetails = await response.json();
-                        throw new Error(errorDetails.message || 'Falha no upload da imagem.');
-                    }
+            const newBlob = await upload(imageFile.name, imageFile, {
+                access: 'public',
+                handleUploadUrl: '/api/upload', // A nossa API que gera a autorização
+            });
 
-                    const newBlob = await response.json();
-                    imageUrl = newBlob.url; // URL público da imagem guardada no Vercel Blob
-                }
+            imageUrl = newBlob.url; // URL final da imagem
+        } else if (id) {
+            // Se não houver ficheiro novo, mantém a URL antiga ao editar
+            const existingProduct = allProducts.find(p => p.id === id);
+            imageUrl = existingProduct?.imageUrl || '';
+        }
+        
+        // 2. Adiciona o URL da imagem aos dados do produto
+        data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
 
-                // Se não houver imagem nova, verifica se já existe uma antiga (no modo de edição)
-                if (!imageUrl && id) {
-                    const existingProduct = allProducts.find(p => p.id === id);
-                    imageUrl = existingProduct?.imageUrl || '';
-                }
+        // 3. Guarda os dados do produto no Firestore (como antes)
+        button.textContent = "A guardar produto...";
+        if (id) {
+            const productRef = doc(db, "products", id);
+            await updateDoc(productRef, data);
+        } else {
+            await addDoc(productsRef, data);
+        }
+        
+        closeModal();
 
-                // 2. Adiciona o URL da imagem aos dados
-                data.imageUrl = imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto';
-
-                // 3. Guarda os dados no Firestore
-                button.textContent = "A guardar produto...";
-                if (id) {
-                    const productRef = doc(db, "products", id);
-                    await updateDoc(productRef, data);
-                } else {
-                    await addDoc(productsRef, data);
-                }
-                
-                closeModal();
-
-            } catch (error) { 
-                console.error("Erro ao guardar produto:", error);
-                alert("Erro ao guardar: " + error.message);
-            } finally { 
-                button.disabled = false;
-                button.textContent = "Guardar"; 
-            }
-        });
+    } catch (error) { 
+        console.error("Erro ao guardar produto:", error);
+        alert("Erro ao guardar: " + error.message);
+    } finally { 
+        button.disabled = false;
+        button.textContent = "Guardar";
+        document.getElementById('product-image-file').value = '';
+    }
+});
 
         document.getElementById('product-list').addEventListener('click', async (e) => {
             const id = e.target.dataset.id;
