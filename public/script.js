@@ -30,7 +30,7 @@ themeToggleButton.addEventListener('click', () => {
 
 // --- SDKs DO FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, getDoc, setDoc, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 // --- VARIÁVEIS GLOBAIS ---
@@ -44,7 +44,7 @@ async function getAppConfig() {
             throw new Error(errorData.message || `O servidor respondeu com o status: ${response.status}`);
         }
         const config = await response.json();
-        cloudinaryConfig = config.cloudinary; // Guarda a configuração do Cloudinary
+        cloudinaryConfig = config.cloudinary; 
         return config.firebase;
     } catch (error) {
         console.error("Falha ao buscar configuração:", error);
@@ -67,21 +67,36 @@ async function initialize() {
         let allCategories = [];
         let allProducts = [];
 
-        onAuthStateChanged(auth, user => {
+        // ✅ LÓGICA DE AUTENTICAÇÃO ATUALIZADA
+        onAuthStateChanged(auth, async (user) => {
             const loginScreen = document.getElementById('login-screen');
             const mainPanel = document.getElementById('main-panel');
+            
             if (user) {
-                loginScreen.classList.add('hidden');
-                mainPanel.classList.remove('hidden');
-                loadSettings();
-                listenToCategories();
-                listenToProducts();
+                // Utilizador está logado, AGORA verificamos se ele é um admin
+                const adminDocRef = doc(db, 'admins', user.uid);
+                const adminDocSnap = await getDoc(adminDocRef);
+
+                if (adminDocSnap.exists()) {
+                    // É um admin! Mostra o painel.
+                    loginScreen.classList.add('hidden');
+                    mainPanel.classList.remove('hidden');
+                    loadSettings();
+                    listenToCategories();
+                    listenToProducts();
+                } else {
+                    // Não é um admin! Desloga e avisa.
+                    alert('Acesso negado. Você não tem permissão para aceder a este painel.');
+                    signOut(auth);
+                }
             } else {
+                // Utilizador está deslogado, mostra o ecrã de login
                 loginScreen.classList.remove('hidden');
                 mainPanel.classList.add('hidden');
             }
         });
 
+        // ✅ LÓGICA DE LOGIN ATUALIZADA (SEM CRIAÇÃO AUTOMÁTICA)
         document.getElementById('login-btn').addEventListener('click', () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -90,16 +105,13 @@ async function initialize() {
 
             signInWithEmailAndPassword(auth, email, password)
                 .catch(error => {
+                    // Apenas mostra erro, não cria mais utilizador
+                    let friendlyMessage = "Ocorreu um erro.";
                     if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                        createUserWithEmailAndPassword(auth, email, password)
-                            .catch(err => {
-                                authError.textContent = "Erro ao criar conta: " + err.message;
-                                authError.classList.remove('hidden');
-                            });
-                    } else {
-                        authError.textContent = error.message;
-                        authError.classList.remove('hidden');
+                        friendlyMessage = "Email ou palavra-passe incorretos.";
                     }
+                    authError.textContent = friendlyMessage;
+                    authError.classList.remove('hidden');
                 });
         });
 
@@ -257,7 +269,6 @@ async function initialize() {
         document.getElementById('add-product-btn').addEventListener('click', () => openModal());
         document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
 
-        // ✅ LÓGICA DE UPLOAD DIRETO PARA O CLOUDINARY
         document.getElementById('save-product-btn').addEventListener('click', async () => {
             const id = document.getElementById('product-id').value;
             const imageFile = document.getElementById('product-image-file').files[0];
