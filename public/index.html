@@ -15,11 +15,21 @@
       }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&display=swap" rel="stylesheet">
+
     <style>
         body { font-family: 'Inter', sans-serif; }
         .modal-bg { background-color: rgba(0,0,0,0.5); }
         body, input, textarea, select, button, div, header {
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        /* REGRA CSS PARA APLICAR A NOVA FONTE AOS TÍTULOS */
+        h1, h2, h3 {
+            font-family: 'Passion One', sans-serif;
+            letter-spacing: 1px; /* Um pequeno ajuste para melhorar a leitura */
         }
     </style>
 </head>
@@ -28,8 +38,8 @@
     <div id="app">
         <div id="login-screen" class="min-h-screen flex items-center justify-center">
             <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
-                <img src="/img/Brazuka-Logo.png" alt="Logótipo Brazuka Delivery" class="w-24 h-24 mx-auto mb-4 rounded-full">
-                <h2 class="text-2xl font-bold text-center text-yellow-700 dark:text-yellow-500 mb-6">Acesso Admin</h2>
+                <img src="/img/Brazuka-Logo.jpg" alt="Logótipo Brazuka Delivery" class="w-24 h-24 mx-auto mb-4 rounded-full">
+                <h2 class="text-3xl font-bold text-center text-yellow-700 dark:text-yellow-500 mb-6">Acesso Admin</h2>
                 <div id="auth-error" class="text-red-500 text-sm mb-4 hidden"></div>
                 <input type="email" id="email" placeholder="Email" class="w-full p-3 border rounded-md mb-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400">
                 <input type="password" id="password" placeholder="Palavra-passe" class="w-full p-3 border rounded-md mb-4 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-400">
@@ -42,8 +52,8 @@
             <header class="bg-white dark:bg-gray-800 shadow-md">
                 <div class="container mx-auto px-6 py-4 flex justify-between items-center">
                     <div class="flex items-center gap-3">
-                        <img src="/img/Brazuka-Logo.png" alt="Logótipo Brazuka" class="w-10 h-10 rounded-full">
-                        <h1 class="text-2xl font-bold text-yellow-700 dark:text-yellow-500">Brazuka Admin</h1>
+                        <img src="/img/Brazuka-Logo.jpg" alt="Logótipo Brazuka" class="w-10 h-10 rounded-full">
+                        <h1 class="text-3xl font-bold text-yellow-700 dark:text-yellow-500">Brazuka Admin</h1>
                     </div>
                     <div class="flex items-center space-x-4">
                         <button id="theme-toggle-btn" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -57,7 +67,7 @@
 
             <main class="container mx-auto px-6 py-8">
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Configurações Gerais</h3>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Configurações Gerais</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label for="whatsapp-number" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Número de WhatsApp</label>
@@ -77,7 +87,7 @@
                 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md self-start">
-                        <h3 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Categorias</h3>
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Categorias</h3>
                         <div id="category-list" class="space-y-2 mb-4"></div>
                         <div class="flex space-x-2">
                             <input type="text" id="new-category-name" placeholder="Nova categoria" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
@@ -86,7 +96,7 @@
                     </div>
                     <div class="lg:col-span-2">
                         <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">Cardápio</h2>
+                            <h2 class="text-3xl font-semibold text-gray-800 dark:text-gray-100">Cardápio</h2>
                             <button id="add-product-btn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Adicionar Produto</button>
                         </div>
                         <div id="product-list" class="space-y-6"></div>
@@ -98,7 +108,7 @@
 
     <div id="product-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
         <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-lg m-4 max-h-[90vh] overflow-y-auto">
-            <h2 id="modal-title" class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Adicionar Novo Produto</h2>
+            <h2 id="modal-title" class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Adicionar Novo Produto</h2>
             <input type="hidden" id="product-id">
             <div class="space-y-4">
                 <input type="text" id="product-name" placeholder="Nome do Produto" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
