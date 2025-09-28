@@ -124,6 +124,7 @@ async function initialize() {
                 document.getElementById('whatsapp-number').value = settings.whatsappNumber || '';
                 document.getElementById('whatsapp-message').value = settings.whatsappMessage || '*Novo Pedido* 🍔\n\n*Cliente:* {cliente}\n*Itens:*\n{itens}\n\n*Morada:*\n{morada}\n*Pagamento:* {pagamento}\n*Total: {total}*';
                 document.getElementById('minimum-order').value = settings.minimumOrder || 5.00;
+                document.getElementById('store-closed-toggle').checked = settings.isStoreClosed || false;
             }
         }
 
@@ -131,7 +132,8 @@ async function initialize() {
             const data = {
                 whatsappNumber: document.getElementById('whatsapp-number').value,
                 whatsappMessage: document.getElementById('whatsapp-message').value,
-                minimumOrder: parseFloat(document.getElementById('minimum-order').value) || 0
+                minimumOrder: parseFloat(document.getElementById('minimum-order').value) || 0,
+                isStoreClosed: document.getElementById('store-closed-toggle').checked
             };
             setDoc(settingsRef, data, {
                 merge: true
