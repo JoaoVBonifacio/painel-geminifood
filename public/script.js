@@ -35,6 +35,7 @@ import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc
 
 // --- VARIÁVEIS GLOBAIS ---
 let cloudinaryConfig = {};
+let storeStatusInterval; // Variável para controlar o nosso verificador de horário
 
 async function getAppConfig() {
     try {
@@ -67,36 +68,31 @@ async function initialize() {
         let allCategories = [];
         let allProducts = [];
 
-        // ✅ LÓGICA DE AUTENTICAÇÃO ATUALIZADA
         onAuthStateChanged(auth, async (user) => {
             const loginScreen = document.getElementById('login-screen');
             const mainPanel = document.getElementById('main-panel');
             
             if (user) {
-                // Utilizador está logado, AGORA verificamos se ele é um admin
                 const adminDocRef = doc(db, 'admins', user.uid);
                 const adminDocSnap = await getDoc(adminDocRef);
 
                 if (adminDocSnap.exists()) {
-                    // É um admin! Mostra o painel.
                     loginScreen.classList.add('hidden');
                     mainPanel.classList.remove('hidden');
-                    loadSettings();
+                    loadSettingsAndStartInterval(); // Carrega as configurações e inicia o verificador
                     listenToCategories();
                     listenToProducts();
                 } else {
-                    // Não é um admin! Desloga e avisa.
                     alert('Acesso negado. Você não tem permissão para aceder a este painel.');
                     signOut(auth);
                 }
             } else {
-                // Utilizador está deslogado, mostra o ecrã de login
                 loginScreen.classList.remove('hidden');
                 mainPanel.classList.add('hidden');
+                clearInterval(storeStatusInterval); // Para o verificador ao deslogar
             }
         });
 
-        // ✅ LÓGICA DE LOGIN ATUALIZADA (SEM CRIAÇÃO AUTOMÁTICA)
         document.getElementById('login-btn').addEventListener('click', () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -105,7 +101,6 @@ async function initialize() {
 
             signInWithEmailAndPassword(auth, email, password)
                 .catch(error => {
-                    // Apenas mostra erro, não cria mais utilizador
                     let friendlyMessage = "Ocorreu um erro.";
                     if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                         friendlyMessage = "Email ou palavra-passe incorretos.";
@@ -117,6 +112,13 @@ async function initialize() {
 
         document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
+        // NOVA FUNÇÃO para carregar e iniciar o intervalo
+        async function loadSettingsAndStartInterval() {
+            await loadSettings();
+            if (storeStatusInterval) clearInterval(storeStatusInterval); // Limpa o intervalo antigo se existir
+            storeStatusInterval = setInterval(checkAndUpdateStoreStatus, 60000); // Roda a cada 60 segundos
+        }
+
         async function loadSettings() {
             const docSnap = await getDoc(settingsRef);
             if (docSnap.exists()) {
@@ -125,20 +127,92 @@ async function initialize() {
                 document.getElementById('whatsapp-message').value = settings.whatsappMessage || '*Novo Pedido* 🍔\n\n*Cliente:* {cliente}\n*Itens:*\n{itens}\n\n*Morada:*\n{morada}\n*Pagamento:* {pagamento}\n*Total: {total}*';
                 document.getElementById('minimum-order').value = settings.minimumOrder || 5.00;
                 document.getElementById('store-closed-toggle').checked = settings.isStoreClosed || false;
+                // Carrega os novos campos de horário
+                document.getElementById('schedule-enabled-toggle').checked = settings.scheduleEnabled || false;
+                document.getElementById('weekday-open').value = settings.weekdayOpen || '15:00';
+                document.getElementById('weekday-close').value = settings.weekdayClose || '23:00';
+                document.getElementById('weekend-open').value = settings.weekendOpen || '10:00';
+                document.getElementById('weekend-close').value = settings.weekendClose || '23:00';
             }
+             await checkAndUpdateStoreStatus(); // Roda uma vez imediatamente ao carregar
         }
-
-        document.getElementById('save-settings-btn').addEventListener('click', () => {
+        
+        // Listener para o botão de salvar
+        document.getElementById('save-settings-btn').addEventListener('click', async () => {
             const data = {
                 whatsappNumber: document.getElementById('whatsapp-number').value,
                 whatsappMessage: document.getElementById('whatsapp-message').value,
                 minimumOrder: parseFloat(document.getElementById('minimum-order').value) || 0,
-                isStoreClosed: document.getElementById('store-closed-toggle').checked
+                isStoreClosed: document.getElementById('store-closed-toggle').checked,
+                // Salva os novos campos
+                scheduleEnabled: document.getElementById('schedule-enabled-toggle').checked,
+                weekdayOpen: document.getElementById('weekday-open').value,
+                weekdayClose: document.getElementById('weekday-close').value,
+                weekendOpen: document.getElementById('weekend-open').value,
+                weekendClose: document.getElementById('weekend-close').value,
             };
-            setDoc(settingsRef, data, {
-                merge: true
-            }).then(() => alert("Configurações guardadas!")).catch(err => alert("Erro: " + err.message));
+            await setDoc(settingsRef, data, { merge: true });
+            alert("Configurações guardadas!");
+            await checkAndUpdateStoreStatus(); // Re-verifica o status imediatamente após salvar
         });
+
+        // NOVA FUNÇÃO PRINCIPAL para verificar o horário
+        async function checkAndUpdateStoreStatus() {
+            console.log("Verificando status da loja...");
+            const settingsSnap = await getDoc(settingsRef);
+            if (!settingsSnap.exists()) return;
+
+            const settings = settingsSnap.data();
+
+            // Se o horário automático não estiver ligado, a lógica para aqui.
+            if (!settings.scheduleEnabled) {
+                console.log("Horário automático desligado. Status manual mantido.");
+                return; 
+            }
+
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0 (Dom) a 6 (Sáb)
+            const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+
+            let isOpenBasedOnSchedule = false;
+
+            // Segunda-feira (dia 1) a loja está fechada
+            if (dayOfWeek === 1) {
+                isOpenBasedOnSchedule = false;
+            } 
+            // Sábado (6) e Domingo (0)
+            else if (dayOfWeek === 0 || dayOfWeek === 6) {
+                if (currentTime >= settings.weekendOpen && currentTime < settings.weekendClose) {
+                    isOpenBasedOnSchedule = true;
+                }
+            } 
+            // Terça (2) a Sexta (5)
+            else {
+                if (currentTime >= settings.weekdayOpen && currentTime < settings.weekdayClose) {
+                    isOpenBasedOnSchedule = true;
+                }
+            }
+
+            const isCurrentlyClosed = !isOpenBasedOnSchedule;
+
+            // Só atualiza o estado no Firestore se for diferente do estado atual
+            if (settings.isStoreClosed !== isCurrentlyClosed) {
+                console.log(`Atualizando status da loja para: ${isCurrentlyClosed ? 'Fechada' : 'Aberta'}`);
+                await updateDoc(settingsRef, { isStoreClosed: isCurrentlyClosed });
+                // Atualiza o interruptor na tela para refletir a mudança
+                document.getElementById('store-closed-toggle').checked = isCurrentlyClosed;
+            } else {
+                 console.log("Status da loja está correto. Nenhuma alteração necessária.");
+            }
+        }
+
+        // Adiciona um listener no interruptor manual para que ele também atualize o Firestore
+        document.getElementById('store-closed-toggle').addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            updateDoc(settingsRef, { isStoreClosed: isChecked });
+        });
+
+        // --- Resto do código (listenToCategories, listenToProducts, etc.) permanece igual ---
 
         function listenToCategories() {
             const q = query(categoriesRef, orderBy("name"));

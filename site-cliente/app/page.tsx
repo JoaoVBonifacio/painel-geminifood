@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { CartModal } from '../components/CartModal';
 import { Header } from '../components/Header';
+import { OpeningHoursModal } from '../components/OpeningHoursModal'; // Importado
 import { db } from '../lib/firebase';
 import { collection, onSnapshot, doc, orderBy, query } from 'firebase/firestore';
 
@@ -18,6 +19,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartVisible, setIsCartVisible] = useState(false);
+  const [isScheduleVisible, setIsScheduleVisible] = useState(false); // Adicionado
 
   useEffect(() => {
     setIsLoading(true);
@@ -47,7 +49,11 @@ export default function Home() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <Header cartItemCount={cartItemCount} onCartClick={() => setIsCartVisible(true)} />
+      <Header 
+        cartItemCount={cartItemCount} 
+        onCartClick={() => setIsCartVisible(true)}
+        onScheduleClick={() => setIsScheduleVisible(true)} // Adicionado
+      />
       
       {settings.isStoreClosed && (
         <div className="bg-red-500 text-white text-center p-3 font-semibold">
@@ -58,7 +64,9 @@ export default function Home() {
       <main className="container mx-auto max-w-4xl p-4">
         {menuData.length > 0 ? (<div className="space-y-12">{menuData.map((section) => (<section key={section.title}><h2 className="text-3xl font-bold text-gray-800 mb-6">{section.title}</h2><div className="grid grid-cols-1 md:grid-cols-2 gap-6">{section.data.map((product) => (<ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} isStoreClosed={settings.isStoreClosed} />))}</div></section>))}</div>) : (<div className="text-center py-20"><p className="text-xl text-gray-500">O nosso cardápio está a ser preparado!</p></div>)}
       </main>
+
       <CartModal isOpen={isCartVisible} onClose={() => setIsCartVisible(false)} cart={cart} settings={settings} total={cartTotal} onChangeQuantity={handleChangeQuantity} setCart={setCart}/>
+      <OpeningHoursModal isOpen={isScheduleVisible} onClose={() => setIsScheduleVisible(false)} /> {/* Adicionado */}
     </div>
   );
 }
