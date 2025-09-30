@@ -1,12 +1,13 @@
+import { ThemeToggleButton } from './ThemeToggleButton'; // Importe o novo componente
+
+// Remova as props relacionadas ao tema
 interface HeaderProps {
   cartItemCount: number;
   onCartClick: () => void;
   onScheduleClick: () => void;
-  onThemeToggleClick: () => void;
-  isDarkMode: boolean; 
 }
 
-export const Header = ({ cartItemCount, onCartClick, onScheduleClick, onThemeToggleClick, isDarkMode }: HeaderProps) => (
+export const Header = ({ cartItemCount, onCartClick, onScheduleClick }: HeaderProps) => (
   <header className="bg-white shadow-md sticky top-0 z-10 dark:bg-gray-800 dark:border-b dark:border-gray-700">
     <div className="container mx-auto max-w-4xl p-4 flex justify-between items-center">
       <h1 className="text-2xl font-bold text-yellow-600">Brazuka Delivery</h1>
@@ -16,16 +17,8 @@ export const Header = ({ cartItemCount, onCartClick, onScheduleClick, onThemeTog
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </button>
         
-        {/* Botão de Alternância de Tema (Lógica Corrigida) */}
-        <button onClick={onThemeToggleClick} className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-            {isDarkMode ? (
-                // Ícone de Lua (mostrado quando o tema está escuro)
-                <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-            ) : (
-                // Ícone de Sol (mostrado quando o tema está claro)
-                <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-            )}
-        </button>
+        {/* Use o novo componente aqui */}
+        <ThemeToggleButton />
 
         {/* Botão do Carrinho */}
         <button onClick={onCartClick} className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">

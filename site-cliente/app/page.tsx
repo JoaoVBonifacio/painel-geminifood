@@ -7,11 +7,13 @@ import { OpeningHoursModal } from '../components/OpeningHoursModal';
 import { db } from '../lib/firebase';
 import { collection, onSnapshot, doc, orderBy, query } from 'firebase/firestore';
 
+// ... (interfaces Product, CartItem, etc. continuam aqui) ...
 export interface Product { id: string; name: string; description: string; price: number; imageUrl: string; categoryId: string; }
 export interface CartItem extends Product { quantity: number; }
 export interface Settings { minimumOrder: number; whatsappNumber: string; whatsappMessage: string; isStoreClosed?: boolean; }
 export interface Category { id: string; name: string; }
 export interface MenuSection { title: string; data: Product[]; }
+
 
 export default function Home() {
   const [menuData, setMenuData] = useState<MenuSection[]>([]);
@@ -20,35 +22,8 @@ export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartVisible, setIsCartVisible] = useState(false);
   const [isScheduleVisible, setIsScheduleVisible] = useState(false);
-  
-  // Lógica do Tema (Corrigida)
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
-    setIsDarkMode(initialDarkMode);
-    if (initialDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  const handleThemeToggle = () => {
-    setIsDarkMode(prevMode => {
-      const newIsDarkMode = !prevMode;
-      localStorage.setItem('theme', newIsDarkMode ? 'dark' : 'light');
-      if (newIsDarkMode) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      return newIsDarkMode;
-    });
-  };
-  // Fim da Lógica do Tema
+  // TODA A LÓGICA DE TEMA FOI REMOVIDA DAQUI
 
   useEffect(() => {
     setIsLoading(true);
@@ -82,8 +57,7 @@ export default function Home() {
         cartItemCount={cartItemCount} 
         onCartClick={() => setIsCartVisible(true)}
         onScheduleClick={() => setIsScheduleVisible(true)}
-        onThemeToggleClick={handleThemeToggle}
-        isDarkMode={isDarkMode} // Passa o estado para o Header
+        // As props de tema não são mais necessárias aqui
       />
       
       {settings.isStoreClosed && (
