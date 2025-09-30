@@ -7,7 +7,6 @@ import { OpeningHoursModal } from '../components/OpeningHoursModal';
 import { db } from '../lib/firebase';
 import { collection, onSnapshot, doc, orderBy, query } from 'firebase/firestore';
 
-// ... (as interfaces Product, CartItem, etc., permanecem as mesmas) ...
 export interface Product { id: string; name: string; description: string; price: number; imageUrl: string; categoryId: string; }
 export interface CartItem extends Product { quantity: number; }
 export interface Settings { minimumOrder: number; whatsappNumber: string; whatsappMessage: string; isStoreClosed?: boolean; }
@@ -22,7 +21,7 @@ export default function Home() {
   const [isCartVisible, setIsCartVisible] = useState(false);
   const [isScheduleVisible, setIsScheduleVisible] = useState(false);
   
-  // Lógica do Tema (NOVO)
+  // Lógica do Tema (Corrigida)
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
@@ -30,32 +29,27 @@ export default function Home() {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const initialDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
     setIsDarkMode(initialDarkMode);
-    applyTheme(initialDarkMode);
-  }, []);
-
-  const applyTheme = (isDark: boolean) => {
-    const lightIcon = document.getElementById('theme-icon-light');
-    const darkIcon = document.getElementById('theme-icon-dark');
-    if (isDark) {
+    if (initialDarkMode) {
       document.documentElement.classList.add('dark');
-      lightIcon?.classList.add('hidden');
-      darkIcon?.classList.remove('hidden');
     } else {
       document.documentElement.classList.remove('dark');
-      lightIcon?.classList.remove('hidden');
-      darkIcon?.classList.add('hidden');
     }
-  };
+  }, []);
 
   const handleThemeToggle = () => {
-    const newIsDarkMode = !isDarkMode;
-    setIsDarkMode(newIsDarkMode);
-    localStorage.setItem('theme', newIsDarkMode ? 'dark' : 'light');
-    applyTheme(newIsDarkMode);
+    setIsDarkMode(prevMode => {
+      const newIsDarkMode = !prevMode;
+      localStorage.setItem('theme', newIsDarkMode ? 'dark' : 'light');
+      if (newIsDarkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      return newIsDarkMode;
+    });
   };
   // Fim da Lógica do Tema
 
-  // ... (o resto do useEffect para carregar dados permanece o mesmo) ...
   useEffect(() => {
     setIsLoading(true);
     const productsUnsubscribe = onSnapshot(collection(db, "products"), (productsSnapshot) => {
@@ -88,7 +82,8 @@ export default function Home() {
         cartItemCount={cartItemCount} 
         onCartClick={() => setIsCartVisible(true)}
         onScheduleClick={() => setIsScheduleVisible(true)}
-        onThemeToggleClick={handleThemeToggle} // Adicionado
+        onThemeToggleClick={handleThemeToggle}
+        isDarkMode={isDarkMode} // Passa o estado para o Header
       />
       
       {settings.isStoreClosed && (
