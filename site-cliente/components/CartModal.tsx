@@ -27,13 +27,12 @@ export const CartModal = ({ isOpen, onClose, cart, settings, total, onChangeQuan
   }, [isOpen]);
 
   return (
-    // OVERLAY ATUALIZADO: Usa a nova classe 'modal-backdrop'
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${isOpen ? 'opacity-100 modal-backdrop' : 'opacity-0 pointer-events-none'}`}
       onClick={onClose}
     >
       <div
-        className={`bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col transform transition-all duration-300 ease-in-out max-h-[90vh] ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+        className={`bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col transform transition-all duration-300 ease-in-out max-h-[90vh] dark:bg-gray-800 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
         onClick={(e) => e.stopPropagation()}
       >
         {isCheckingOut ? (
@@ -47,9 +46,9 @@ export const CartModal = ({ isOpen, onClose, cart, settings, total, onChangeQuan
            />
         ) : (
           <>
-            <div className="p-5 border-b flex justify-between items-center flex-shrink-0">
-              <h2 className="text-xl font-bold text-gray-800">O seu Carrinho</h2>
-              <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            <div className="p-5 border-b flex justify-between items-center flex-shrink-0 dark:border-gray-700">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">O seu Carrinho</h2>
+              <button onClick={onClose} className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 text-2xl">&times;</button>
             </div>
 
             <div className="flex-grow overflow-y-auto p-5">
@@ -58,33 +57,33 @@ export const CartModal = ({ isOpen, onClose, cart, settings, total, onChangeQuan
                   {cart.map(item => (
                     <div key={item.id} className="flex items-center justify-between gap-4">
                       <div className="flex-grow">
-                        <p className="font-semibold text-gray-800">{item.name}</p>
-                        <p className="text-sm text-gray-500">{formatCurrency(item.price)}</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-100">{item.name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{formatCurrency(item.price)}</p>
                       </div>
-                      <div className="flex items-center gap-3 bg-gray-100 rounded-full flex-shrink-0">
-                        <button onClick={() => onChangeQuantity(item.id, -1)} className="text-lg font-bold w-8 h-8 rounded-full hover:bg-gray-200 text-gray-700">-</button>
-                        <span className="font-semibold w-5 text-center text-gray-800">{item.quantity}</span>
-                        <button onClick={() => onChangeQuantity(item.id, 1)} className="text-lg font-bold w-8 h-8 rounded-full hover:bg-gray-200 text-gray-700">+</button>
+                      <div className="flex items-center gap-3 bg-gray-100 rounded-full flex-shrink-0 dark:bg-gray-700">
+                        <button onClick={() => onChangeQuantity(item.id, -1)} className="text-lg font-bold w-8 h-8 rounded-full hover:bg-gray-200 text-gray-700 dark:hover:bg-gray-600 dark:text-gray-300">-</button>
+                        <span className="font-semibold w-5 text-center text-gray-800 dark:text-gray-200">{item.quantity}</span>
+                        <button onClick={() => onChangeQuantity(item.id, 1)} className="text-lg font-bold w-8 h-8 rounded-full hover:bg-gray-200 text-gray-700 dark:hover:bg-gray-600 dark:text-gray-300">+</button>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-16">
-                  <p className="text-gray-500">O seu carrinho está vazio.</p>
-                  <p className="text-sm text-gray-400 mt-2">Adicione itens do cardápio para começar.</p>
+                  <p className="text-gray-500 dark:text-gray-400">O seu carrinho está vazio.</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">Adicione itens do cardápio para começar.</p>
                 </div>
               )}
             </div>
 
             {cart.length > 0 && (
-              <div className="p-5 border-t bg-gray-50 rounded-b-2xl flex-shrink-0">
+              <div className="p-5 border-t bg-gray-50 rounded-b-2xl flex-shrink-0 dark:bg-gray-900/50 dark:border-gray-700">
                  {!canCheckout && (
                     <p className="text-xs text-center text-red-600 mb-3">
                       Faltam {formatCurrency(minimumOrder - total)} para o pedido mínimo.
                     </p>
                   )}
-                <div className="flex justify-between items-center font-bold text-lg mb-4 text-gray-800">
+                <div className="flex justify-between items-center font-bold text-lg mb-4 text-gray-800 dark:text-gray-100">
                   <span>Total</span>
                   <span>{formatCurrency(total)}</span>
                 </div>
