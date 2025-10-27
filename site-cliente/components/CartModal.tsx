@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
+// Importa as interfaces atualizadas de page.tsx
 import { CartItem, Settings } from '../app/page';
 import { CheckoutForm } from './CheckoutForm';
 
 interface CartModalProps {
   isOpen: boolean;
   onClose: () => void;
-  cart: CartItem[];
+  cart: CartItem[]; // CartItem agora tem selectedOption e id composto
   settings: Settings;
   total: number;
-  onChangeQuantity: (productId: string, amount: number) => void;
+  onChangeQuantity: (cartItemId: string, amount: number) => void; // Recebe o id composto
   setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
 }
 
@@ -20,14 +21,14 @@ export const CartModal = ({ isOpen, onClose, cart, settings, total, onChangeQuan
   const canCheckout = total >= minimumOrder;
 
   useEffect(() => {
+    // Reset checkout state when modal closes
     if (!isOpen) {
-      const timer = setTimeout(() => setIsCheckingOut(false), 300);
+      const timer = setTimeout(() => setIsCheckingOut(false), 300); // Delay to allow fade out
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
   return (
-    // OVERLAY ATUALIZADO: Usa a nova classe 'modal-backdrop'
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${isOpen ? 'opacity-100 modal-backdrop' : 'opacity-0 pointer-events-none'}`}
       onClick={onClose}
@@ -42,8 +43,8 @@ export const CartModal = ({ isOpen, onClose, cart, settings, total, onChangeQuan
               cart={cart}
               total={total}
               settings={settings}
-              onClose={onClose}
-              setCart={setCart}
+              onClose={onClose} // Pass onClose to allow CheckoutForm to close the modal
+              setCart={setCart} // Pass setCart to allow CheckoutForm to clear the cart
            />
         ) : (
           <>
@@ -56,12 +57,20 @@ export const CartModal = ({ isOpen, onClose, cart, settings, total, onChangeQuan
               {cart.length > 0 ? (
                 <div className="space-y-4">
                   {cart.map(item => (
+                    // Use item.id (composite ID) as key
                     <div key={item.id} className="flex items-center justify-between gap-4">
                       <div className="flex-grow">
-                        <p className="font-semibold text-gray-800">{item.name}</p>
+                        {/* Show product name and selected option name */}
+                        <p className="font-semibold text-gray-800">
+                          {item.name}
+                          {/* Conditionally show option name if it's not the default or only option */}
+                          {item.selectedOption && item.selectedOption.name !== "Padrão" && ` - ${item.selectedOption.name}`}
+                        </p>
+                        {/* Show unit price of the selected option */}
                         <p className="text-sm text-gray-500">{formatCurrency(item.price)}</p>
                       </div>
                       <div className="flex items-center gap-3 bg-gray-100 rounded-full flex-shrink-0">
+                        {/* Pass the composite cartItemId to onChangeQuantity */}
                         <button onClick={() => onChangeQuantity(item.id, -1)} className="text-lg font-bold w-8 h-8 rounded-full hover:bg-gray-200 text-gray-700">-</button>
                         <span className="font-semibold w-5 text-center text-gray-800">{item.quantity}</span>
                         <button onClick={() => onChangeQuantity(item.id, 1)} className="text-lg font-bold w-8 h-8 rounded-full hover:bg-gray-200 text-gray-700">+</button>
@@ -79,9 +88,9 @@ export const CartModal = ({ isOpen, onClose, cart, settings, total, onChangeQuan
 
             {cart.length > 0 && (
               <div className="p-5 border-t bg-gray-50 rounded-b-2xl flex-shrink-0">
-                 {!canCheckout && (
+                 {!canCheckout && minimumOrder > 0 && ( // Only show if minimum order is set > 0
                     <p className="text-xs text-center text-red-600 mb-3">
-                      Faltam {formatCurrency(minimumOrder - total)} para o pedido mínimo.
+                      Faltam {formatCurrency(minimumOrder - total)} para atingir o pedido mínimo de {formatCurrency(minimumOrder)}.
                     </p>
                   )}
                 <div className="flex justify-between items-center font-bold text-lg mb-4 text-gray-800">
