@@ -30,6 +30,19 @@
             font-family: 'Passion One', sans-serif;
             letter-spacing: 1px;
         }
+        /* Estilo para a linha de opção */
+        .option-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px; /* Espaçamento entre os inputs e botão */
+        }
+        .option-row input[type="text"] {
+            flex-grow: 1; /* Input de nome ocupa espaço restante */
+        }
+         .option-row input[type="number"] {
+            width: 100px; /* Largura fixa para preço */
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900">
@@ -73,7 +86,7 @@
                         </div>
                         <div>
                             <label for="minimum-order" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Pedido Mínimo (€)</label>
-                            <input type="number" id="minimum-order" placeholder="5.00" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                            <input type="number" id="minimum-order" placeholder="5.00" step="0.01" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                         </div>
                         <div class="md:col-span-2">
                             <label for="whatsapp-message" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Modelo da Mensagem</label>
@@ -147,13 +160,22 @@
         <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-lg m-4 max-h-[90vh] overflow-y-auto">
             <h2 id="modal-title" class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Adicionar Novo Produto</h2>
             <input type="hidden" id="product-id">
+            
             <div class="space-y-4">
-                <input type="text" id="product-name" placeholder="Nome do Produto" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                <input type="text" id="product-name" placeholder="Nome do Produto" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
                 <textarea id="product-desc" placeholder="Descrição" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"></textarea>
-                <input type="number" id="product-price" placeholder="Preço (€)" step="0.01" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
-                <div>
+                
+                <div class="border-t dark:border-gray-600 pt-4 mt-4">
+                    <label class="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Opções do Produto</label>
+                    <div id="product-options-container" class="space-y-3">
+                        </div>
+                    <button type="button" onclick="addOption()" class="mt-2 text-sm text-green-600 hover:text-green-500 font-medium">+ Adicionar Opção</button>
+                </div>
+                 <div>
                      <label for="product-category" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Categoria</label>
-                     <select id="product-category" class="w-full p-3 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"></select>
+                     <select id="product-category" class="w-full p-3 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
+                         <option value="">-- Selecione uma categoria --</option>
+                         </select>
                 </div>
                 <div>
                     <label for="product-image-file" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Fotografia do Produto</label>
@@ -166,8 +188,9 @@
                         dark:file:bg-gray-700 dark:file:text-gray-200 dark:hover:file:bg-gray-600
                     ">
                     <img id="image-preview" src="" alt="Pré-visualização da imagem" class="mt-2 h-32 w-auto object-cover rounded-md hidden"/>
-                </div>
+                    <input type="hidden" id="existing-image-url"> </div>
             </div>
+            
             <div class="flex justify-end mt-6 space-x-4">
                 <button id="cancel-modal-btn" type="button" class="text-gray-600 dark:text-gray-300 px-4 py-2 rounded-md">Cancelar</button>
                 <button id="save-product-btn" type="button" class="bg-orange-500 text-white px-4 py-2 rounded-md">Guardar</button>
