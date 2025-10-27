@@ -7,43 +7,34 @@
     <title>Painel de Controlo - Brazuka</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+      // Configuração inicial do Tailwind (sem dark mode automático aqui)
       tailwind.config = {
-        darkMode: 'class',
         theme: {
           extend: {}
         }
       }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&display=swap" rel="stylesheet">
-
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .modal-bg { background-color: rgba(0,0,0,0.5); }
+        /* Transições (opcional, pode manter ou remover) */
         body, input, textarea, select, button, div, header {
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
-        h1, h2, h3 {
+         h1, h2, h3 {
             font-family: 'Passion One', sans-serif;
             letter-spacing: 1px;
         }
-        .option-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            gap: 10px;
-        }
-        .option-row input[type="text"] { flex-grow: 1; }
-        .option-row input[type="number"] { width: 100px; }
-        /* A classe .hidden do Tailwind será usada no JS */
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900">
+<body class="bg-gray-100 dark:bg-gray-900"> {/* Mantém classes dark para JS controlar */}
 
     <div id="app">
-        {/* --- Tela de Login (Começa VISÍVEL) --- */}
+        {/* --- Tela de Login --- */}
         <div id="login-screen" class="min-h-screen flex items-center justify-center">
             <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
                 <img src="/img/Brazuka-Logo.png" alt="Logótipo Brazuka Delivery" class="w-24 h-24 mx-auto mb-4 rounded-full">
@@ -55,15 +46,16 @@
             </div>
         </div>
 
-        {/* --- Painel Principal (Começa ESCONDIDO com 'hidden') --- */}
+        {/* --- Painel Principal (começa escondido) --- */}
         <div id="main-panel" class="hidden">
             <header class="bg-white dark:bg-gray-800 shadow-md">
                 <div class="container mx-auto px-6 py-4 flex justify-between items-center">
                     <div class="flex items-center gap-3">
-                        <img src="/img/Brazuka-Logo.png" alt="Logótipo Brazuka" class="w-10 h-10 rounded-full">
+                         <img src="/img/Brazuka-Logo.png" alt="Logótipo Brazuka" class="w-10 h-10 rounded-full">
                         <h1 class="text-3xl font-bold text-yellow-700 dark:text-yellow-500">Brazuka Admin</h1>
                     </div>
                     <div class="flex items-center space-x-4">
+                        {/* Botão Tema */}
                         <button id="theme-toggle-btn" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                            <svg id="theme-icon-light" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
                            <svg id="theme-icon-dark" class="w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
@@ -76,37 +68,80 @@
             <main class="container mx-auto px-6 py-8">
                 {/* Secção Configurações Gerais */}
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-                    {/* ... (Conteúdo Configurações, Horário, Toggles - igual) ... */}
-                     <h3 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Configurações Gerais</h3>
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* ... */}
-                     </div>
-                     <div class="mt-6 pt-6 border-t dark:border-gray-700">
-                         <h3 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Horário de Funcionamento</h3>
-                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* ... */}
-                         </div>
-                     </div>
-                     <div class="mt-6 pt-6 border-t dark:border-gray-700 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                         {/* ... */}
-                     </div>
-                     <button id="save-settings-btn" class="mt-6 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full md:w-auto">Guardar Configurações</button>
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Configurações Gerais</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Inputs WhatsApp, Pedido Mínimo, Mensagem */}
+                         <div>
+                            <label for="whatsapp-number" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Número de WhatsApp</label>
+                            <input type="text" id="whatsapp-number" placeholder="351912345678" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                        </div>
+                        <div>
+                            <label for="minimum-order" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Pedido Mínimo (€)</label>
+                            <input type="number" id="minimum-order" placeholder="5.00" step="0.01" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="whatsapp-message" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Modelo da Mensagem</label>
+                            <textarea id="whatsapp-message" rows="3" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"></textarea>
+                        </div>
+                    </div>
+                    {/* Secção Horário */}
+                    <div class="mt-6 pt-6 border-t dark:border-gray-700">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Horário de Funcionamento</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Inputs Horário */}
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-600 dark:text-gray-300">Terça a Sexta</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="time" id="weekday-open" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                                    <span class="text-gray-500">às</span>
+                                    <input type="time" id="weekday-close" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-600 dark:text-gray-300">Sábado e Domingo</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="time" id="weekend-open" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                                    <span class="text-gray-500">às</span>
+                                    <input type="time" id="weekend-close" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {/* Secção Toggles */}
+                    <div class="mt-6 pt-6 border-t dark:border-gray-700 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                         <div class="flex items-center space-x-3">
+                            <label for="schedule-enabled-toggle" class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="schedule-enabled-toggle" class="sr-only peer">
+                              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+                            </label>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Usar Horário Automático</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <label for="store-closed-toggle" class="relative inline-flex items-center cursor-pointer">
+                              <input type="checkbox" id="store-closed-toggle" class="sr-only peer">
+                              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                            </label>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Forçar Loja Fechada (Manual)</span>
+                        </div>
+                    </div>
+                    {/* Botão Guardar Configurações */}
+                    <button id="save-settings-btn" class="mt-6 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full md:w-auto">Guardar Configurações</button>
                 </div>
 
-                {/* Grid para Categorias e Cardápio */}
+                {/* Grid Categorias e Cardápio */}
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Coluna Categorias */}
                     <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md self-start">
-                        {/* ... (Conteúdo Categorias - igual) ... */}
-                         <h3 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Categorias</h3>
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-700 dark:text-gray-200">Categorias</h3>
                         <div id="category-list" class="space-y-2 mb-4"></div>
                         <div class="flex space-x-2">
                             <input type="text" id="new-category-name" placeholder="Nova categoria" class="w-full p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                             <button id="add-category-btn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">+</button>
                         </div>
                     </div>
+                    {/* Coluna Cardápio */}
                     <div class="lg:col-span-2">
-                        {/* ... (Conteúdo Cardápio - igual) ... */}
-                         <div class="flex justify-between items-center mb-6">
+                        <div class="flex justify-between items-center mb-6">
                             <h2 class="text-3xl font-semibold text-gray-800 dark:text-gray-100">Cardápio</h2>
                             <button id="add-product-btn" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Adicionar Produto</button>
                         </div>
@@ -117,56 +152,44 @@
         </div>
     </div>
 
-    {/* --- Modal do Produto (igual à última versão) --- */}
+    {/* --- Modal do Produto (Versão ORIGINAL com Preço ÚNICO) --- */}
     <div id="product-modal" class="fixed inset-0 modal-bg items-center justify-center hidden z-50">
         <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-lg m-4 max-h-[90vh] overflow-y-auto">
-             {/* ... (Título, ID, Nome, Descrição) ... */}
             <h2 id="modal-title" class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Adicionar Novo Produto</h2>
             <input type="hidden" id="product-id">
+
             <div class="space-y-4">
                 <input type="text" id="product-name" placeholder="Nome do Produto" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
                 <textarea id="product-desc" placeholder="Descrição" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"></textarea>
 
-                {/* Switch Tipo de Preço */}
-                <div class="flex items-center space-x-3 mt-4 mb-2">
-                    <label for="price-type-toggle" class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" id="price-type-toggle" class="sr-only peer">
-                      <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                    </label>
-                    <span id="price-type-label" class="text-sm font-medium text-gray-700 dark:text-gray-300">Preço Único</span>
-                </div>
+                {/* --- Campo de Preço ÚNICO --- */}
+                <input type="number" id="product-price" placeholder="Preço (€)" step="0.01" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
 
-                {/* Preço Único (começa visível) */}
-                <div id="single-price-section">
-                     <label for="product-price" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Preço (€)</label>
-                     <input type="number" id="product-price" placeholder="Preço (€)" step="0.01" class="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
-                </div>
-
-                {/* Múltiplas Opções (começa escondido) */}
-                <div id="multiple-options-section" class="hidden border-t dark:border-gray-600 pt-4 mt-4">
-                    <label class="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Opções do Produto (ex: Porções, Tamanhos)</label>
-                    <div id="product-options-container" class="space-y-3"></div>
-                    <button type="button" onclick="addOption()" class="mt-2 text-sm text-green-600 hover:text-green-500 font-medium">+ Adicionar Opção</button>
-                </div>
-
-                {/* Categoria e Imagem */}
-                 <div>
+                {/* --- Categoria --- */}
+                <div>
                      <label for="product-category" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Categoria</label>
                      <select id="product-category" class="w-full p-3 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
                          <option value="">-- Selecione uma categoria --</option>
+                         {/* Opções preenchidas por JS */}
                      </select>
                 </div>
-                 <div>
+                {/* --- Imagem --- */}
+                <div>
                     <label for="product-image-file" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Fotografia do Produto</label>
                     <input type="file" id="product-image-file" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400
-                        file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold
-                        file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100
-                        dark:file:bg-gray-700 dark:file:text-gray-200 dark:hover:file:bg-gray-600">
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-md file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-orange-50 file:text-orange-600
+                        hover:file:bg-orange-100
+                        dark:file:bg-gray-700 dark:file:text-gray-200 dark:hover:file:bg-gray-600
+                    ">
                     <img id="image-preview" src="" alt="Pré-visualização da imagem" class="mt-2 h-32 w-auto object-cover rounded-md hidden"/>
-                    <input type="hidden" id="existing-image-url">
+                    <input type="hidden" id="existing-image-url"> {/* Guarda URL existente ao editar */}
                 </div>
             </div>
-            {/* Botões do Modal */}
+
+            {/* --- Botões do Modal --- */}
             <div class="flex justify-end mt-6 space-x-4">
                 <button id="cancel-modal-btn" type="button" class="text-gray-600 dark:text-gray-300 px-4 py-2 rounded-md">Cancelar</button>
                 <button id="save-product-btn" type="button" class="bg-orange-500 text-white px-4 py-2 rounded-md">Guardar</button>
