@@ -1,5 +1,5 @@
 import { Product } from '../app/page'; // Importa o tipo da página principal
-interface ProductCardProps { product: Product; onAddToCart: (product: Product) => void; }
+interface ProductCardProps { product: Product; onAddToCart: (product: Product) => void; isStoreClosed?: boolean;}
 const formatCurrency = (value: number) => `${(value || 0).toFixed(2).replace('.', ',')} €`;
 export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => (
   <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">

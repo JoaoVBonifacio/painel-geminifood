@@ -4,6 +4,10 @@
   "private": true,
   "dependencies": {
     "cloudinary": "^1.41.0",
+    "firebase": "^12.4.0",
     "next": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2"
   }
 }
