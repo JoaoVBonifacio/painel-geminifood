@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { useState } from 'react';
 // Importa as interfaces atualizadas de page.tsx
 import { Product, ProductOption } from '../app/page';
@@ -49,7 +50,7 @@ export const ProductCard = ({ product, onAddToCart, isStoreClosed }: ProductCard
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
       <div className="w-full h-48">
-        <img
+        <Image
           src={product.imageUrl || 'https://placehold.co/400x300/cccccc/ffffff?text=Sem+Foto'} // Fallback
           alt={product.name}
           className="w-full h-full object-cover"

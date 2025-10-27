@@ -73,10 +73,10 @@ export default function Home() {
           }
         } else {
            // Ensure options have name and price, correcting if necessary
-           data.options = data.options.map((opt: any, index: number) => ({
-             name: typeof opt.name === 'string' && opt.name.trim() !== '' ? opt.name.trim() : `Opção ${index + 1}`,
-             price: typeof opt.price === 'number' ? opt.price : 0
-           }));
+           data.options = data.options.map((opt: { name?: string; price?: number }, index: number) => ({
+                name: typeof opt.name === 'string' && opt.name.trim() !== '' ? opt.name.trim() : `Opção ${index + 1}`,
+                price: typeof opt.price === 'number' ? opt.price : 0
+            }));
         }
         // Remove the old price field from the object before casting to Product type
         delete data.price;
