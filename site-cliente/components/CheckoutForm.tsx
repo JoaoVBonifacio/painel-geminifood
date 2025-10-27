@@ -41,20 +41,21 @@ export const CheckoutForm = ({ onBack, onClose, cart, total, settings, setCart }
         onClose();
     };
 
-    const inputStyle = "w-full p-3 border border-gray-200 bg-gray-50 rounded-lg text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder:text-gray-400";
+    // Estilo base para os inputs para evitar repetição
+    const inputStyle = "w-full p-3 border border-gray-200 bg-gray-50 rounded-lg text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none";
 
     return (
         <>
-            <div className="p-5 border-b flex items-center flex-shrink-0 dark:border-gray-700">
-                <button onClick={onBack} className="text-xl mr-4 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">&larr;</button>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Finalizar Pedido</h2>
+            <div className="p-5 border-b flex items-center flex-shrink-0">
+                <button onClick={onBack} className="text-xl mr-4 text-gray-600 hover:text-gray-900">&larr;</button>
+                <h2 className="text-xl font-bold text-gray-800">Finalizar Pedido</h2>
             </div>
             
             <div className="flex-grow overflow-y-auto p-5 space-y-4">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome Completo</label>
+                <label className="text-sm font-semibold text-gray-700">Nome Completo</label>
                 <input type="text" placeholder="O seu nome" value={customerName} onChange={e => setCustomerName(e.target.value)} className={inputStyle} />
                 
-                <h3 className="font-semibold pt-2 text-gray-700 dark:text-gray-300">Morada de Entrega</h3>
+                <h3 className="font-semibold pt-2 text-gray-700">Morada de Entrega</h3>
                 <input type="text" placeholder="Código Postal" value={address.cp} onChange={e => setAddress(a => ({...a, cp: e.target.value}))} className={inputStyle} />
                 <div className="flex gap-2">
                    <input type="text" placeholder="Morada" value={address.morada} onChange={e => setAddress(a => ({...a, morada: e.target.value}))} className={`${inputStyle} flex-1`} />
@@ -64,17 +65,17 @@ export const CheckoutForm = ({ onBack, onClose, cart, total, settings, setCart }
                 <input type="text" placeholder="Localidade" value={address.localidade} onChange={e => setAddress(a => ({...a, localidade: e.target.value}))} className={inputStyle} />
                  <input type="text" placeholder="Concelho" value={address.concelho} onChange={e => setAddress(a => ({...a, concelho: e.target.value}))} className={inputStyle}/>
 
-                <h3 className="font-semibold pt-2 text-gray-700 dark:text-gray-300">Forma de Pagamento</h3>
+                <h3 className="font-semibold pt-2 text-gray-700">Forma de Pagamento</h3>
                  <div className="grid grid-cols-3 gap-2">
                     {['MB Way', 'Cartão', 'Dinheiro'].map(method => (
-                        <button key={method} onClick={() => setPaymentMethod(method)} className={`p-3 border rounded-lg text-sm text-gray-700 font-semibold transition-colors dark:text-gray-300 ${paymentMethod === method ? 'bg-orange-100 border-orange-400 ring-2 ring-orange-300 dark:bg-orange-900/50 dark:border-orange-500' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600'}`}>
+                        <button key={method} onClick={() => setPaymentMethod(method)} className={`p-3 border rounded-lg text-sm text-gray-700 font-semibold transition-colors ${paymentMethod === method ? 'bg-orange-100 border-orange-400 ring-2 ring-orange-300' : 'bg-gray-50 hover:bg-gray-100'}`}>
                             {method}
                         </button>
                     ))}
                  </div>
             </div>
             
-            <div className="p-5 border-t bg-gray-50 rounded-b-2xl flex-shrink-0 dark:bg-gray-900/50 dark:border-gray-700">
+            <div className="p-5 border-t bg-gray-50 rounded-b-2xl flex-shrink-0">
                 <button onClick={handleCheckout} className="w-full bg-green-500 text-white font-bold py-3 px-5 rounded-lg hover:bg-green-600 transition-colors">
                     Confirmar Pedido via WhatsApp
                 </button>
