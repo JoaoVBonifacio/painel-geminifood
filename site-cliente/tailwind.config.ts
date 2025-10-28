@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
-  darkMode: 'class', // <--- Mude de 'media' (implícito) para 'class'
+  darkMode: 'media', // <--- Mude de 'media' (implícito) para 'class'
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',

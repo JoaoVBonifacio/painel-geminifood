@@ -58,8 +58,8 @@ export const CheckoutForm = ({ onBack, onClose, cart, total, settings, setCart }
                 <h3 className="font-semibold pt-2 text-gray-700">Morada de Entrega</h3>
                 <input type="text" placeholder="Código Postal" value={address.cp} onChange={e => setAddress(a => ({...a, cp: e.target.value}))} className={inputStyle} />
                 <div className="flex gap-2">
-                   <input type="text" placeholder="Morada" value={address.morada} onChange={e => setAddress(a => ({...a, morada: e.target.value}))} className={`${inputStyle} flex-1`} />
-                   <input type="text" placeholder="Nº" value={address.numero} onChange={e => setAddress(a => ({...a, numero: e.target.value}))} className={`${inputStyle} w-24`} />
+                   <input type="text" placeholder="Morada" value={address.morada} onChange={e => setAddress(a => ({...a, morada: e.target.value}))} className={`${inputStyle} w-24`} />
+                   <input type="text" placeholder="Nº" value={address.numero} onChange={e => setAddress(a => ({...a, numero: e.target.value}))} className={`${inputStyle}`} />
                 </div>
                 <input type="text" placeholder="Complemento (opcional)" value={address.comp} onChange={e => setAddress(a => ({...a, comp: e.target.value}))} className={inputStyle} />
                 <input type="text" placeholder="Localidade" value={address.localidade} onChange={e => setAddress(a => ({...a, localidade: e.target.value}))} className={inputStyle} />
