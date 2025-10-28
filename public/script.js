@@ -529,12 +529,12 @@ function renderProductList() {
                 categorySectionHTML += `
                     <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm flex items-start">
                         <img src="${imageUrl}" alt="${product.name}" class="w-20 h-20 rounded-md object-cover mr-4 flex-shrink-0">
-                        <div class="flex-grow min-w-0"> {/* Adicionado min-w-0 para truncar corretamente */}
-                            <h4 class="font-semibold text-gray-800 dark:text-gray-100 truncate">${product.name}</h4> {/* truncate para nomes longos */}
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words">${product.description || 'Sem descrição'}</p> {/* break-words para descrições longas */}
+                        <div class="flex-grow min-w-0">
+                            <h4 class="font-semibold text-gray-800 dark:text-gray-100 truncate">${product.name}</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words">${product.description || 'Sem descrição'}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-300 mt-1 font-medium">${priceText}</p>
                         </div>
-                        <div class="flex flex-col items-end justify-start space-y-1 flex-shrink-0 ml-2"> {/* ml-2 para espaço */}
+                        <div class="flex flex-col items-end justify-start space-y-1 flex-shrink-0 ml-2">
                              <button class="edit-btn text-xs text-blue-500 hover:text-blue-400" data-id="${product.id}">Editar</button>
                              <button class="delete-btn text-xs text-red-500 hover:text-red-400" data-id="${product.id}">Remover</button>
                          </div>
