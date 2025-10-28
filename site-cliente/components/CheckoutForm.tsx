@@ -86,7 +86,7 @@ export const CheckoutForm = ({ onBack, onClose, cart, total, settings, setCart }
                 <h3 className="font-semibold pt-2 text-gray-700 dark:text-gray-300">Morada de Entrega</h3>
                 <input type="text" placeholder="Código Postal" value={address.cp} onChange={e => setAddress(a => ({...a, cp: e.target.value}))} className={inputStyle} />
                 <div className="flex gap-2">
-                   <input type="text" placeholder="Morada" value={address.morada} onChange={e => setAddress(a => ({...a, morada: e.target.value}))} className={`${inputStyle} flex-1`} />
+                   <input type="text" placeholder="Morada" value={address.morada} onChange={e => setAddress(a => ({...a, morada: e.target.value}))} className={`${inputStyle} w-32`} />
                    {/* --- Removida a largura fixa w-24 do campo Número --- */}
                    <input type="text" placeholder="Nº" value={address.numero} onChange={e => setAddress(a => ({...a, numero: e.target.value}))} className={`${inputStyle} w-32`} /> {/* Ou ajuste w-32 se necessário */}
                 </div>
